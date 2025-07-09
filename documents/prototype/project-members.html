@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTNet - Project Members</title>
+    
+    <!-- Import Fluent 2 Web Components -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@fluentui/web-components@2.5.16/dist/web-components.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fluentui/web-components/dist/web-components.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        /* Project Members Specific Styles */
+        .project-header {
+            padding: 24px;
+            background-color: #ffffff;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            margin-bottom: 24px;
+        }
+        
+        .project-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .project-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .members-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .members-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 600;
+            color: #616161;
+            border-bottom: 1px solid var(--neutral-stroke-rest);
+            font-size: 14px;
+        }
+        
+        .members-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--neutral-stroke-rest);
+            font-size: 14px;
+        }
+        
+        .members-table tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .member-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .member-avatar {
+            margin-right: 12px;
+        }
+        
+        .member-name {
+            font-weight: 500;
+        }
+        
+        .member-email {
+            color: #616161;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+        
+        .member-role {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .role-director {
+            background-color: rgba(0, 120, 212, 0.1);
+            color: #0078d4;
+            border: 1px solid rgba(0, 120, 212, 0.3);
+        }
+        
+        .role-pm {
+            background-color: rgba(16, 124, 16, 0.1);
+            color: #107c10;
+            border: 1px solid rgba(16, 124, 16, 0.3);
+        }
+        
+        .role-member {
+            background-color: rgba(128, 128, 128, 0.1);
+            color: #616161;
+            border: 1px solid rgba(128, 128, 128, 0.3);
+        }
+        
+        .member-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        
+        .add-member-dialog {
+            width: 400px;
+            max-width: 90vw;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .dialog-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--neutral-stroke-rest);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dialog-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .dialog-close {
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.1s;
+        }
+        
+        .dialog-close:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .dialog-body {
+            padding: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .dialog-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--neutral-stroke-rest);
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        
+        .dialog-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+        
+        .search-results {
+            margin-top: 16px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--neutral-stroke-rest);
+            border-radius: 4px;
+        }
+        
+        .search-result-item {
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.1s;
+        }
+        
+        .search-result-item:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .search-result-item:not(:last-child) {
+            border-bottom: 1px solid var(--neutral-stroke-rest);
+        }
+        
+        .search-result-avatar {
+            margin-right: 12px;
+        }
+        
+        .search-result-info {
+            flex-grow: 1;
+        }
+        
+        .search-result-name {
+            font-weight: 500;
+        }
+        
+        .search-result-email {
+            color: #616161;
+            font-size: 12px;
+        }
+        
+        .search-no-results {
+            padding: 16px;
+            text-align: center;
+            color: #616161;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo">
+            <i class="fas fa-project-diagram" style="color: #0078d4; font-size: 24px;"></i>
+            <h1>VTNet</h1>
+        </div>
+        <nav class="navigation">
+            <div class="nav-item" data-page="dashboard" onclick="window.location.href='index.html'">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item active" data-page="projects" onclick="window.location.href='index.html'">
+                <i class="fas fa-folder"></i>
+                <span>Projects</span>
+            </div>
+            <div class="nav-item" data-page="users" onclick="window.location.href='user-management.html'">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+            </div>
+            <div class="nav-item" data-page="settings">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="breadcrumb">
+                <span class="breadcrumb-item" data-page="home">Home</span> / 
+                <span class="breadcrumb-item" data-page="projects">Projects</span> /
+                <span class="breadcrumb-item" data-page="project-details" onclick="window.location.href='project-details.html'">Website Redesign</span> /
+                <span class="breadcrumb-item active" data-page="members">Members</span>
+            </div>
+            <div class="user-actions">
+                <div class="search-container">
+                    <fluent-search placeholder="Search members..."></fluent-search>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar-container">
+                        <fluent-avatar name="John Doe" size="32"></fluent-avatar>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <!-- Project Header -->
+            <div class="project-header">
+                <div class="project-header-top">
+                    <h1 class="page-title">Website Redesign - Members</h1>
+                    <div class="project-actions">
+                        <fluent-button appearance="accent" id="addMemberBtn">
+                            <i class="fas fa-user-plus" style="margin-right: 8px;"></i>
+                            Add Member
+                        </fluent-button>
+                    </div>
+                </div>
+                
+                <p class="project-description">
+                    Manage team members and their roles for the Website Redesign project.
+                </p>
+            </div>
+            
+            <!-- Members Table -->
+            <div class="card">
+                <table class="members-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%;">Member</th>
+                            <th style="width: 20%;">Role</th>
+                            <th style="width: 20%;">Added On</th>
+                            <th style="width: 20%;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div class="member-info">
+                                    <div class="member-avatar">
+                                        <fluent-avatar name="John Doe" size="32"></fluent-avatar>
+                                    </div>
+                                    <div>
+                                        <div class="member-name">John Doe</div>
+                                        <div class="member-email">john.doe@example.com</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="member-role role-director">Director</span>
+                            </td>
+                            <td>May 15, 2023</td>
+                            <td>
+                                <div class="member-actions">
+                                    <fluent-button appearance="outline">Change Role</fluent-button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="member-info">
+                                    <div class="member-avatar">
+                                        <fluent-avatar name="Sarah Johnson" size="32"></fluent-avatar>
+                                    </div>
+                                    <div>
+                                        <div class="member-name">Sarah Johnson</div>
+                                        <div class="member-email">sarah.j@example.com</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="member-role role-pm">Project Manager</span>
+                            </td>
+                            <td>May 15, 2023</td>
+                            <td>
+                                <div class="member-actions">
+                                    <fluent-button appearance="outline">Change Role</fluent-button>
+                                    <fluent-button appearance="outline">Remove</fluent-button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="member-info">
+                                    <div class="member-avatar">
+                                        <fluent-avatar name="Michael Chen" size="32"></fluent-avatar>
+                                    </div>
+                                    <div>
+                                        <div class="member-name">Michael Chen</div>
+                                        <div class="member-email">michael.c@example.com</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="member-role role-member">Team Member</span>
+                            </td>
+                            <td>May 18, 2023</td>
+                            <td>
+                                <div class="member-actions">
+                                    <fluent-button appearance="outline">Change Role</fluent-button>
+                                    <fluent-button appearance="outline">Remove</fluent-button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="member-info">
+                                    <div class="member-avatar">
+                                        <fluent-avatar name="Emily Wong" size="32"></fluent-avatar>
+                                    </div>
+                                    <div>
+                                        <div class="member-name">Emily Wong</div>
+                                        <div class="member-email">emily.w@example.com</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="member-role role-member">Team Member</span>
+                            </td>
+                            <td>May 20, 2023</td>
+                            <td>
+                                <div class="member-actions">
+                                    <fluent-button appearance="outline">Change Role</fluent-button>
+                                    <fluent-button appearance="outline">Remove</fluent-button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Member Dialog -->
+    <div class="dialog-backdrop" id="dialogBackdrop"></div>
+    <div class="add-member-dialog" id="addMemberDialog">
+        <div class="dialog-header">
+            <div class="dialog-title">Add Project Member</div>
+            <div class="dialog-close" id="closeDialog">×</div>
+        </div>
+        <div class="dialog-body">
+            <div class="form-group">
+                <label class="form-label">Search User</label>
+                <fluent-text-field placeholder="Search by name or email" style="width: 100%;" id="searchUserField"></fluent-text-field>
+            </div>
+            
+            <div class="search-results" id="searchResults">
+                <div class="search-result-item">
+                    <div class="search-result-avatar">
+                        <fluent-avatar name="Alex Rodriguez" size="32"></fluent-avatar>
+                    </div>
+                    <div class="search-result-info">
+                        <div class="search-result-name">Alex Rodriguez</div>
+                        <div class="search-result-email">alex.r@example.com</div>
+                    </div>
+                </div>
+                <div class="search-result-item">
+                    <div class="search-result-avatar">
+                        <fluent-avatar name="Lisa Taylor" size="32"></fluent-avatar>
+                    </div>
+                    <div class="search-result-info">
+                        <div class="search-result-name">Lisa Taylor</div>
+                        <div class="search-result-email">lisa.t@example.com</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group" style="margin-top: 24px;">
+                <label class="form-label">Project Role</label>
+                <fluent-select style="width: 100%;">
+                    <fluent-option>Project Manager</fluent-option>
+                    <fluent-option selected>Team Member</fluent-option>
+                </fluent-select>
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <fluent-button appearance="outline" id="cancelDialog">Cancel</fluent-button>
+            <fluent-button appearance="accent">Add to Project</fluent-button>
+        </div>
+    </div>
+
+    <!-- Change Role Dialog -->
+    <div class="add-member-dialog" id="changeRoleDialog" style="display: none;">
+        <div class="dialog-header">
+            <div class="dialog-title">Change Member Role</div>
+            <div class="dialog-close" id="closeRoleDialog">×</div>
+        </div>
+        <div class="dialog-body">
+            <div class="member-info" style="margin-bottom: 24px;">
+                <div class="member-avatar">
+                    <fluent-avatar name="Michael Chen" size="40"></fluent-avatar>
+                </div>
+                <div>
+                    <div class="member-name">Michael Chen</div>
+                    <div class="member-email">michael.c@example.com</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Project Role</label>
+                <fluent-select style="width: 100%;">
+                    <fluent-option>Project Manager</fluent-option>
+                    <fluent-option selected>Team Member</fluent-option>
+                </fluent-select>
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <fluent-button appearance="outline" id="cancelRoleDialog">Cancel</fluent-button>
+            <fluent-button appearance="accent">Update Role</fluent-button>
+        </div>
+    </div>
+
+    <!-- Chatbot -->
+    <div class="chatbot-toggle">
+        <i class="fas fa-comment-dots"></i>
+    </div>
+
+    <div class="chatbot-panel">
+        <div class="chatbot-header">
+            <div class="chatbot-title">AI Assistant</div>
+            <div class="chatbot-close">×</div>
+        </div>
+        <div class="chatbot-messages">
+            <div class="message bot">
+                <div class="message-content">
+                    Hello! How can I help you with managing project members today?
+                </div>
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <fluent-text-field placeholder="Ask a question..." style="flex-grow: 1; margin-right: 8px;"></fluent-text-field>
+            <fluent-button appearance="accent">Send</fluent-button>
+        </div>
+    </div>
+
+    <!-- Custom JavaScript -->
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize chatbot
+            initChatbot();
+            
+            // Handle add member dialog
+            const addMemberBtn = document.getElementById('addMemberBtn');
+            const dialogBackdrop = document.getElementById('dialogBackdrop');
+            const addMemberDialog = document.getElementById('addMemberDialog');
+            const closeDialog = document.getElementById('closeDialog');
+            const cancelDialog = document.getElementById('cancelDialog');
+            const searchUserField = document.getElementById('searchUserField');
+            const searchResults = document.getElementById('searchResults');
+            
+            function openDialog() {
+                dialogBackdrop.style.display = 'block';
+                addMemberDialog.style.display = 'block';
+                searchResults.style.display = 'none';
+            }
+            
+            function closeDialogFunc() {
+                dialogBackdrop.style.display = 'none';
+                addMemberDialog.style.display = 'none';
+                changeRoleDialog.style.display = 'none';
+            }
+            
+            addMemberBtn.addEventListener('click', openDialog);
+            closeDialog.addEventListener('click', closeDialogFunc);
+            cancelDialog.addEventListener('click', closeDialogFunc);
+            dialogBackdrop.addEventListener('click', closeDialogFunc);
+            
+            // Simulate search functionality
+            searchUserField.addEventListener('input', () => {
+                if (searchUserField.value.trim() !== '') {
+                    searchResults.style.display = 'block';
+                } else {
+                    searchResults.style.display = 'none';
+                }
+            });
+            
+            // Handle search result clicks
+            document.querySelectorAll('.search-result-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const name = item.querySelector('.search-result-name').textContent;
+                    alert(`Selected user: ${name}`);
+                });
+            });
+            
+            // Handle change role buttons
+            const changeRoleDialog = document.getElementById('changeRoleDialog');
+            const closeRoleDialog = document.getElementById('closeRoleDialog');
+            const cancelRoleDialog = document.getElementById('cancelRoleDialog');
+            
+            document.querySelectorAll('.member-actions fluent-button:first-child').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const memberName = btn.closest('tr').querySelector('.member-name').textContent;
+                    dialogBackdrop.style.display = 'block';
+                    changeRoleDialog.style.display = 'block';
+                    
+                    // Update dialog title with member name
+                    changeRoleDialog.querySelector('.dialog-title').textContent = `Change Role: ${memberName}`;
+                });
+            });
+            
+            closeRoleDialog.addEventListener('click', closeDialogFunc);
+            cancelRoleDialog.addEventListener('click', closeDialogFunc);
+            
+            // Handle remove member buttons
+            document.querySelectorAll('.member-actions fluent-button:last-child').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const memberName = btn.closest('tr').querySelector('.member-name').textContent;
+                    
+                    if (confirm(`Are you sure you want to remove ${memberName} from the project?`)) {
+                        // In a real app, this would remove the member
+                        alert(`${memberName} has been removed from the project.`);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

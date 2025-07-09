@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTNet - Project Document Management System</title>
+    
+    <!-- Import Fluent 2 Web Components -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@fluentui/web-components@2.5.16/dist/web-components.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fluentui/web-components/dist/web-components.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Sidebar Navigation - Directly embedded -->
+    <aside class="sidebar">
+        <div class="logo">
+            <i class="fas fa-project-diagram" style="color: #0078d4; font-size: 24px;"></i>
+            <h1>VTNet</h1>
+        </div>
+        <nav class="navigation">
+            <div class="nav-item active" data-page="dashboard">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item" data-page="projects" onclick="window.location.href='index.html'">
+                <i class="fas fa-folder"></i>
+                <span>Projects</span>
+            </div>
+            <div class="nav-item" data-page="users" onclick="window.location.href='user-management.html'">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+            </div>
+            <div class="nav-item" data-page="settings">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Top Bar - Directly embedded -->
+        <div class="top-bar">
+            <div class="breadcrumb">
+                <span class="breadcrumb-item" data-page="home">Home</span> / 
+                <span class="breadcrumb-item" data-page="projects">Projects</span>
+            </div>
+            <div class="user-actions">
+                <div class="search-container">
+                    <fluent-search placeholder="Search projects and documents..."></fluent-search>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar-container">
+                        <fluent-avatar name="John Doe" size="32"></fluent-avatar>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <h1 class="page-title">Projects</h1>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">All Projects</h2>
+                    <fluent-button appearance="accent">+ New Project</fluent-button>
+                </div>
+                
+                <div class="filter-bar" style="margin-bottom: 16px;">
+                    <fluent-button appearance="outline" onclick="window.location.href='archived-projects.html'">
+                        <i class="fas fa-archive" style="margin-right: 8px;"></i>
+                        View Archived Projects
+                    </fluent-button>
+                </div>
+                
+                <div id="projects-grid" class="project-grid">
+                    <!-- Project cards will be dynamically created from the template -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Chatbot - Directly embedded -->
+    <div class="chatbot-toggle">
+        <i class="fas fa-comment-dots"></i>
+    </div>
+
+    <div class="chatbot-panel">
+        <div class="chatbot-header">
+            <div class="chatbot-title">AI Assistant</div>
+            <div class="chatbot-close">×</div>
+        </div>
+        <div class="chatbot-messages">
+            <div class="message bot">
+                <div class="message-content">
+                    Hello! How can I help you with your projects and documents today?
+                </div>
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <fluent-text-field placeholder="Ask a question about your documents..." style="flex-grow: 1; margin-right: 8px;"></fluent-text-field>
+            <fluent-button appearance="accent">Send</fluent-button>
+        </div>
+    </div>
+
+    <!-- Project Card Template -->
+    <template id="project-card-template">
+        <fluent-card class="project-card">
+            <div class="project-header">
+                <h3 class="project-title">${title}</h3>
+                <span class="project-status ${statusClass}">${status}</span>
+            </div>
+            <div class="project-body">
+                <p class="project-desc">${description}</p>
+                <div class="project-meta">
+                    <span>${documentCount} documents</span>
+                    <span>Updated ${updatedTime}</span>
+                </div>
+            </div>
+        </fluent-card>
+    </template>
+    
+    <!-- Custom JavaScript -->
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize chatbot
+            initChatbot();
+            
+            // Initialize breadcrumb
+            updateBreadcrumb('projects');
+            
+            // Render projects
+            renderProjects(sampleProjects);
+            
+            // Initialize ripple effect
+            initRippleEffect();
+            
+            // Add click handlers for project cards
+            document.addEventListener('click', function(e) {
+                const projectCard = e.target.closest('.project-card');
+                if (projectCard) {
+                    // Navigate to project details page
+                    window.location.href = 'project-details.html';
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTNet - User Management</title>
+    
+    <!-- Import Fluent 2 Web Components -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@fluentui/web-components@2.5.16/dist/web-components.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fluentui/web-components/dist/web-components.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        /* User Management Specific Styles */
+        .user-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+        
+        .user-card {
+            background-color: #ffffff;
+            border-radius: 4px;
+            border: 1px solid var(--neutral-stroke-rest);
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+            position: relative;
+        }
+        
+        .user-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+        }
+        
+        .user-header {
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--neutral-stroke-rest);
+        }
+        
+        .user-avatar {
+            margin-right: 16px;
+        }
+        
+        .user-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .user-email {
+            font-size: 14px;
+            color: #616161;
+        }
+        
+        .user-body {
+            padding: 16px;
+        }
+        
+        .user-role {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+        
+        .role-director {
+            background-color: rgba(0, 120, 212, 0.1);
+            color: #0078d4;
+            border: 1px solid rgba(0, 120, 212, 0.3);
+        }
+        
+        .role-pm {
+            background-color: rgba(16, 124, 16, 0.1);
+            color: #107c10;
+            border: 1px solid rgba(16, 124, 16, 0.3);
+        }
+        
+        .role-member {
+            background-color: rgba(128, 128, 128, 0.1);
+            color: #616161;
+            border: 1px solid rgba(128, 128, 128, 0.3);
+        }
+        
+        .role-admin {
+            background-color: rgba(232, 17, 35, 0.1);
+            color: #e81123;
+            border: 1px solid rgba(232, 17, 35, 0.3);
+        }
+        
+        .user-meta {
+            margin-top: 16px;
+            font-size: 14px;
+            color: #616161;
+        }
+        
+        .user-meta div {
+            margin-bottom: 8px;
+            display: flex;
+        }
+        
+        .user-meta i {
+            width: 20px;
+            margin-right: 8px;
+            text-align: center;
+        }
+        
+        .user-actions {
+            margin-top: 16px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .filter-label {
+            font-weight: 500;
+            color: #616161;
+        }
+        
+        .role-filter {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .role-filter-item {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+            background-color: #f5f5f5;
+            transition: background-color 0.2s;
+        }
+        
+        .role-filter-item:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .role-filter-item.active {
+            background-color: var(--accent-fill-rest);
+            color: white;
+        }
+        
+        .add-user-dialog {
+            width: 400px;
+            max-width: 90vw;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .dialog-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--neutral-stroke-rest);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dialog-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .dialog-close {
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.1s;
+        }
+        
+        .dialog-close:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .dialog-body {
+            padding: 24px;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .dialog-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--neutral-stroke-rest);
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        
+        .dialog-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo">
+            <i class="fas fa-project-diagram" style="color: #0078d4; font-size: 24px;"></i>
+            <h1>VTNet</h1>
+        </div>
+        <nav class="navigation">
+            <div class="nav-item" data-page="dashboard" onclick="window.location.href='index.html'">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item" data-page="projects" onclick="window.location.href='index.html'">
+                <i class="fas fa-folder"></i>
+                <span>Projects</span>
+            </div>
+            <div class="nav-item active" data-page="users" onclick="window.location.href='user-management.html'">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+            </div>
+            <div class="nav-item" data-page="settings">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="breadcrumb">
+                <span class="breadcrumb-item" data-page="home">Home</span> / 
+                <span class="breadcrumb-item active" data-page="users">Users</span>
+            </div>
+            <div class="user-actions">
+                <div class="search-container">
+                    <fluent-search placeholder="Search users..."></fluent-search>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar-container">
+                        <fluent-avatar name="John Doe" size="32"></fluent-avatar>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="card-title">User Management</h1>
+                    <fluent-button appearance="accent" id="addUserBtn">
+                        <i class="fas fa-user-plus" style="margin-right: 8px;"></i>
+                        Add User
+                    </fluent-button>
+                </div>
+                
+                <div class="filter-bar">
+                    <span class="filter-label">Filter by role:</span>
+                    <div class="role-filter">
+                        <div class="role-filter-item active">All</div>
+                        <div class="role-filter-item">Director</div>
+                        <div class="role-filter-item">Project Manager</div>
+                        <div class="role-filter-item">Team Member</div>
+                        <div class="role-filter-item">Admin</div>
+                    </div>
+                </div>
+                
+                <div class="user-grid">
+                    <!-- User cards will be dynamically created -->
+                    <div class="user-card">
+                        <div class="user-header">
+                            <div class="user-avatar">
+                                <fluent-avatar name="John Doe" size="40"></fluent-avatar>
+                            </div>
+                            <div>
+                                <div class="user-name">John Doe</div>
+                                <div class="user-email">john.doe@example.com</div>
+                            </div>
+                        </div>
+                        <div class="user-body">
+                            <div class="user-role role-director">Director</div>
+                            <div class="user-meta">
+                                <div>
+                                    <i class="fas fa-project-diagram"></i>
+                                    <span>Projects: 12</span>
+                                </div>
+                                <div>
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>Joined: Jan 15, 2022</span>
+                                </div>
+                                <div>
+                                    <i class="fas fa-clock"></i>
+                                    <span>Last active: Today</span>
+                                </div>
+                            </div>
+                            <div class="user-actions">
+                                <fluent-button appearance="outline">Edit</fluent-button>
+                                <fluent-button appearance="outline">Reset Password</fluent-button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="user-card">
+                        <div class="user-header">
+                            <div class="user-avatar">
+                                <fluent-avatar name="Sarah Johnson" size="40"></fluent-avatar>
+                            </div>
+                            <div>
+                                <div class="user-name">Sarah Johnson</div>
+                                <div class="user-email">sarah.j@example.com</div>
+                            </div>
+                        </div>
+                        <div class="user-body">
+                            <div class="user-role role-pm">Project Manager</div>
+                            <div class="user-meta">
+                                <div>
+                                    <i class="fas fa-project-diagram"></i>
+                                    <span>Projects: 3</span>
+                                </div>
+                                <div>
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>Joined: Mar 22, 2022</span>
+                                </div>
+                                <div>
+                                    <i class="fas fa-clock"></i>
+                                    <span>Last active: Yesterday</span>
+                                </div>
+                            </div>
+                            <div class="user-actions">
+                                <fluent-button appearance="outline">Edit</fluent-button>
+                                <fluent-button appearance="outline">Reset Password</fluent-button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="user-card">
+                        <div class="user-header">
+                            <div class="user-avatar">
+                                <fluent-avatar name="Michael Chen" size="40"></fluent-avatar>
+                            </div>
+                            <div>
+                                <div class="user-name">Michael Chen</div>
+                                <div class="user-email">michael.c@example.com</div>
+                            </div>
+                        </div>
+                        <div class="user-body">
+                            <div class="user-role role-member">Team Member</div>
+                            <div class="user-meta">
+                                <div>
+                                    <i class="fas fa-project-diagram"></i>
+                                    <span>Projects: 2</span>
+                                </div>
+                                <div>
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>Joined: Jun 10, 2022</span>
+                                </div>
+                                <div>
+                                    <i class="fas fa-clock"></i>
+                                    <span>Last active: 3 days ago</span>
+                                </div>
+                            </div>
+                            <div class="user-actions">
+                                <fluent-button appearance="outline">Edit</fluent-button>
+                                <fluent-button appearance="outline">Reset Password</fluent-button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="user-card">
+                        <div class="user-header">
+                            <div class="user-avatar">
+                                <fluent-avatar name="Alex Rodriguez" size="40"></fluent-avatar>
+                            </div>
+                            <div>
+                                <div class="user-name">Alex Rodriguez</div>
+                                <div class="user-email">alex.r@example.com</div>
+                            </div>
+                        </div>
+                        <div class="user-body">
+                            <div class="user-role role-admin">System Admin</div>
+                            <div class="user-meta">
+                                <div>
+                                    <i class="fas fa-project-diagram"></i>
+                                    <span>Projects: All</span>
+                                </div>
+                                <div>
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>Joined: Jan 5, 2022</span>
+                                </div>
+                                <div>
+                                    <i class="fas fa-clock"></i>
+                                    <span>Last active: Today</span>
+                                </div>
+                            </div>
+                            <div class="user-actions">
+                                <fluent-button appearance="outline">Edit</fluent-button>
+                                <fluent-button appearance="outline">Reset Password</fluent-button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add User Dialog -->
+    <div class="dialog-backdrop" id="dialogBackdrop"></div>
+    <div class="add-user-dialog" id="addUserDialog">
+        <div class="dialog-header">
+            <div class="dialog-title">Add New User</div>
+            <div class="dialog-close" id="closeDialog">×</div>
+        </div>
+        <div class="dialog-body">
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <fluent-text-field placeholder="Enter full name" style="width: 100%;"></fluent-text-field>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <fluent-text-field placeholder="Enter email address" style="width: 100%;"></fluent-text-field>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <fluent-text-field placeholder="Enter password" type="password" style="width: 100%;"></fluent-text-field>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Role</label>
+                <fluent-select style="width: 100%;">
+                    <fluent-option>Director</fluent-option>
+                    <fluent-option>Project Manager</fluent-option>
+                    <fluent-option selected>Team Member</fluent-option>
+                    <fluent-option>System Admin</fluent-option>
+                </fluent-select>
+            </div>
+        </div>
+        <div class="dialog-footer">
+            <fluent-button appearance="outline" id="cancelDialog">Cancel</fluent-button>
+            <fluent-button appearance="accent">Create User</fluent-button>
+        </div>
+    </div>
+
+    <!-- Chatbot -->
+    <div class="chatbot-toggle">
+        <i class="fas fa-comment-dots"></i>
+    </div>
+
+    <div class="chatbot-panel">
+        <div class="chatbot-header">
+            <div class="chatbot-title">AI Assistant</div>
+            <div class="chatbot-close">×</div>
+        </div>
+        <div class="chatbot-messages">
+            <div class="message bot">
+                <div class="message-content">
+                    Hello! How can I help you with user management today?
+                </div>
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <fluent-text-field placeholder="Ask a question..." style="flex-grow: 1; margin-right: 8px;"></fluent-text-field>
+            <fluent-button appearance="accent">Send</fluent-button>
+        </div>
+    </div>
+
+    <!-- Custom JavaScript -->
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize chatbot
+            initChatbot();
+            
+            // Handle role filter clicks
+            document.querySelectorAll('.role-filter-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.role-filter-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    // In a real app, this would filter the users
+                    const role = item.textContent;
+                    if (role !== 'All') {
+                        alert(`Filtering users by role: ${role}`);
+                    }
+                });
+            });
+            
+            // Handle add user dialog
+            const addUserBtn = document.getElementById('addUserBtn');
+            const dialogBackdrop = document.getElementById('dialogBackdrop');
+            const addUserDialog = document.getElementById('addUserDialog');
+            const closeDialog = document.getElementById('closeDialog');
+            const cancelDialog = document.getElementById('cancelDialog');
+            
+            function openDialog() {
+                dialogBackdrop.style.display = 'block';
+                addUserDialog.style.display = 'block';
+            }
+            
+            function closeDialogFunc() {
+                dialogBackdrop.style.display = 'none';
+                addUserDialog.style.display = 'none';
+            }
+            
+            addUserBtn.addEventListener('click', openDialog);
+            closeDialog.addEventListener('click', closeDialogFunc);
+            cancelDialog.addEventListener('click', closeDialogFunc);
+            dialogBackdrop.addEventListener('click', closeDialogFunc);
+            
+            // Handle edit user buttons
+            document.querySelectorAll('.user-actions fluent-button:first-child').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const userName = btn.closest('.user-card').querySelector('.user-name').textContent;
+                    alert(`Editing user: ${userName}`);
+                });
+            });
+            
+            // Handle reset password buttons
+            document.querySelectorAll('.user-actions fluent-button:last-child').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const userName = btn.closest('.user-card').querySelector('.user-name').textContent;
+                    alert(`Resetting password for: ${userName}`);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

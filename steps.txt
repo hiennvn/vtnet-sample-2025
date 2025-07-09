@@ -1,0 +1,50 @@
+
+--- SETUP ---
+
+1. Create new mode: Product (You are the expert in IT area with very strong business mindset. You want to build a world-class product with perfect user experiences. You are good at writing the concise and detailed software requirement documents.)
+
+2. Create new mode: Design (You are a UX/UI design expert, have deep knowledge about design mechanism, chase for perfect pixel design. Your design style is creative, use the latest design trend. You love the Fluent 2 Design of Microsoft)
+
+3. Create rule: java-springboot.mdc (*.java): https://cursor.directory/java-spring-cursor-rules 
+
+4. Create rule: technical-tutorials.mdc (manual): https://cursor.directory/technical-tutorials 
+
+5. Create rule: react-typescript.mdc (manual): https://github.com/PatrickJS/awesome-cursorrules/blob/main/rules/react-typescript-nextjs-nodejs-cursorrules-prompt-/.cursorrules
+
+6. Create rule core (always): https://forum.cursor.com/t/how-to-add-cline-memory-bank-feature-to-your-cursor/67868
+
+7. Setup memory bank:
+- Create memory-bank/
+- Agent: initialize memory bank
+
+
+--- BUILD REQUIREMENTS ---
+1. Create 0.overview.md file 
+
+2. AI Product / Gemini 2.5 Pro: I have an idea about the software system in @0.overview.md , you have a great management mindset, write me the product overview to 1.product.md file, includes: objectives, users, main usecases, main modules or sub-systems. You are open to add more content to this file for more detail. You are also open to ask me more questions if there is any unclear content. 
+
+3. AI Product / Gemini 2.5 Pro: From Key Features, stated line 29 of @1.product.md , write detailed user stories to files. Group the user stories by feature to 2.userstories_[feature].md file. The user story must be ordered by priority, contains size, description, acceptance criterias
+
+4. AI Design / Sonet-3.7: With the overview of the product in @1.product.md and all user stories in @2.1.userstories_project_management.md @2.2.userstories_document_handling.md @2.3.userstories_intelligent_search_chatbot.md , create a prototype to index.html in @/prototype 
+
+5. AI Design / Sonet-3.7: With the overview of the product in @1.product.md and all user stories in @2.1.userstories_project_management.md @2.2.userstories_document_handling.md @2.3.userstories_intelligent_search_chatbot.md , the mockup in @index.html , generate other pages to @/prototype . Try to reuse as most shared components as possible
+
+
+--- CODING ---
+1. AI Agent / Sonet-3.7: @technical-tutorials.mdc 
+I want to build the system with the requirements in @1.product.md @2.1.userstories_project_management.md @2.2.userstories_document_handling.md @2.3.userstories_intelligent_search_chatbot.md , the technologies are described in @3.techbase.md , write the architecture and details of applied technologies to 3.tech_structure.md file
+
+2. AI Agent / Sonet-3.7: @technical-tutorials.mdc 
+From @3.2.tech_structure.md , break down to the tasks as the checklist into 3.3.implement_checklist.md file
+
+3. AI Agent / Sonet-3.7: update memory bank (update rules to Always)
+
+REMOVE core.mdc to Manual
+
+4. AI Agent / Sonet-3.7: Follow the checklist@3.3.implement_checklist.md , implement the backend in step 1.2. Project Scaffolding (line 14). Remember to update the checklist.
+
+5. AI Agent / Sonet-3.7: Follow the checklist @3.3.implement_checklist.md , implement step "3.1. Project Setup" (line 67). Remember to update the checklist.
+
+--- TDD ---
+
+--- TESTING ---

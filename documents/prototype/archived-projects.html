@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTNet - Archived Projects</title>
+    
+    <!-- Import Fluent 2 Web Components -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@fluentui/web-components@2.5.16/dist/web-components.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fluentui/web-components/dist/web-components.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        /* Archived Projects Specific Styles */
+        .archive-notice {
+            background-color: rgba(0, 0, 0, 0.04);
+            border-left: 4px solid #797775;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .archive-notice i {
+            font-size: 24px;
+            color: #797775;
+            margin-right: 16px;
+        }
+        
+        .archive-notice-content {
+            flex-grow: 1;
+        }
+        
+        .archive-notice-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .archive-notice-text {
+            color: #616161;
+        }
+        
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+        
+        .project-card {
+            background-color: #ffffff;
+            border-radius: 4px;
+            border: 1px solid var(--neutral-stroke-rest);
+            overflow: hidden;
+            transition: box-shadow 0.2s, transform 0.2s;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .project-card:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+            transform: translateY(-2px);
+        }
+        
+        .project-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--neutral-stroke-rest);
+            position: relative;
+        }
+        
+        .archive-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background-color: rgba(121, 119, 117, 0.1);
+            color: #797775;
+            border: 1px solid rgba(121, 119, 117, 0.3);
+            border-radius: 10px;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .project-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            padding-right: 80px;
+        }
+        
+        .project-status {
+            font-size: 12px;
+            font-weight: 500;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        
+        .status-completed {
+            color: #0078d4;
+            background-color: rgba(0, 120, 212, 0.1);
+            border: 1px solid rgba(0, 120, 212, 0.3);
+        }
+        
+        .status-cancelled {
+            color: #e81123;
+            background-color: rgba(232, 17, 35, 0.1);
+            border: 1px solid rgba(232, 17, 35, 0.3);
+        }
+        
+        .project-body {
+            padding: 16px;
+        }
+        
+        .project-desc {
+            font-size: 14px;
+            color: #616161;
+            margin-bottom: 16px;
+            height: 60px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .project-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #616161;
+        }
+        
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .filter-label {
+            font-weight: 500;
+            color: #616161;
+        }
+        
+        .status-filter {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .status-filter-item {
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            cursor: pointer;
+            background-color: #f5f5f5;
+            transition: background-color 0.2s;
+        }
+        
+        .status-filter-item:hover {
+            background-color: #e0e0e0;
+        }
+        
+        .status-filter-item.active {
+            background-color: var(--accent-fill-rest);
+            color: white;
+        }
+        
+        .restore-dialog {
+            width: 400px;
+            max-width: 90vw;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.14);
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .dialog-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--neutral-stroke-rest);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dialog-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .dialog-close {
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: background-color 0.1s;
+        }
+        
+        .dialog-close:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .dialog-body {
+            padding: 24px;
+        }
+        
+        .dialog-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--neutral-stroke-rest);
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        
+        .dialog-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+        
+        .empty-state {
+            padding: 48px 24px;
+            text-align: center;
+            color: #616161;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: #95a5a6;
+        }
+        
+        .card-menu {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo">
+            <i class="fas fa-project-diagram" style="color: #0078d4; font-size: 24px;"></i>
+            <h1>VTNet</h1>
+        </div>
+        <nav class="navigation">
+            <div class="nav-item" data-page="dashboard" onclick="window.location.href='index.html'">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item active" data-page="projects" onclick="window.location.href='index.html'">
+                <i class="fas fa-folder"></i>
+                <span>Projects</span>
+            </div>
+            <div class="nav-item" data-page="users" onclick="window.location.href='user-management.html'">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+            </div>
+            <div class="nav-item" data-page="settings">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="breadcrumb">
+                <span class="breadcrumb-item" data-page="home">Home</span> / 
+                <span class="breadcrumb-item" data-page="projects">Projects</span> /
+                <span class="breadcrumb-item active" data-page="archived">Archived</span>
+            </div>
+            <div class="user-actions">
+                <div class="search-container">
+                    <fluent-search placeholder="Search archived projects..."></fluent-search>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar-container">
+                        <fluent-avatar name="John Doe" size="32"></fluent-avatar>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <h1 class="page-title">Archived Projects</h1>
+            
+            <!-- Archive Notice -->
+            <div class="archive-notice">
+                <i class="fas fa-archive"></i>
+                <div class="archive-notice-content">
+                    <div class="archive-notice-title">Archive Information</div>
+                    <div class="archive-notice-text">
+                        Archived projects are read-only. You can view their contents, but cannot make changes. 
+                        To make changes, you need to restore a project first.
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">All Archived Projects</h2>
+                    <fluent-button appearance="outline" onclick="window.location.href='index.html'">
+                        <i class="fas fa-arrow-left" style="margin-right: 8px;"></i>
+                        Back to Active Projects
+                    </fluent-button>
+                </div>
+                
+                <div class="filter-bar">
+                    <span class="filter-label">Filter by status:</span>
+                    <div class="status-filter">
+                        <div class="status-filter-item active">All</div>
+                        <div class="status-filter-item">Completed</div>
+                        <div class="status-filter-item">Cancelled</div>
+                    </div>
+                </div>
+                
+                <div class="project-grid">
+                    <!-- Project cards will be dynamically created -->
+                    <div class="project-card">
+                        <div class="project-header">
+                            <span class="archive-badge">Archived</span>
+                            <h3 class="project-title">Legacy Website Migration</h3>
+                            <span class="project-status status-completed">Completed</span>
+                            <div class="card-menu">
+                                <fluent-menu>
+                                    <fluent-button slot="trigger" appearance="stealth" aria-label="More options">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </fluent-button>
+                                    <fluent-menu-item id="restoreProject1">Restore Project</fluent-menu-item>
+                                    <fluent-menu-item>Delete Permanently</fluent-menu-item>
+                                </fluent-menu>
+                            </div>
+                        </div>
+                        <div class="project-body">
+                            <p class="project-desc">Migration of the legacy corporate website to a modern platform with improved security and performance.</p>
+                            <div class="project-meta">
+                                <span>24 documents</span>
+                                <span>Archived: 3 months ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="project-card">
+                        <div class="project-header">
+                            <span class="archive-badge">Archived</span>
+                            <h3 class="project-title">2022 Marketing Campaign</h3>
+                            <span class="project-status status-completed">Completed</span>
+                            <div class="card-menu">
+                                <fluent-menu>
+                                    <fluent-button slot="trigger" appearance="stealth" aria-label="More options">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </fluent-button>
+                                    <fluent-menu-item>Restore Project</fluent-menu-item>
+                                    <fluent-menu-item>Delete Permanently</fluent-menu-item>
+                                </fluent-menu>
+                            </div>
+                        </div>
+                        <div class="project-body">
+                            <p class="project-desc">Annual marketing campaign for 2022 with focus on digital channels and social media engagement.</p>
+                            <div class="project-meta">
+                                <span>18 documents</span>
+                                <span>Archived: 6 months ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="project-card">
+                        <div class="project-header">
+                            <span class="archive-badge">Archived</span>
+                            <h3 class="project-title">Mobile App Prototype</h3>
+                            <span class="project-status status-cancelled">Cancelled</span>
+                            <div class="card-menu">
+                                <fluent-menu>
+                                    <fluent-button slot="trigger" appearance="stealth" aria-label="More options">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </fluent-button>
+                                    <fluent-menu-item>Restore Project</fluent-menu-item>
+                                    <fluent-menu-item>Delete Permanently</fluent-menu-item>
+                                </fluent-menu>
+                            </div>
+                        </div>
+                        <div class="project-body">
+                            <p class="project-desc">Prototype for a new customer-facing mobile application. Project was cancelled due to change in business priorities.</p>
+                            <div class="project-meta">
+                                <span>7 documents</span>
+                                <span>Archived: 2 months ago</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="project-card">
+                        <div class="project-header">
+                            <span class="archive-badge">Archived</span>
+                            <h3 class="project-title">Employee Portal Redesign</h3>
+                            <span class="project-status status-completed">Completed</span>
+                            <div class="card-menu">
+                                <fluent-menu>
+                                    <fluent-button slot="trigger" appearance="stealth" aria-label="More options">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </fluent-button>
+                                    <fluent-menu-item>Restore Project</fluent-menu-item>
+                                    <fluent-menu-item>Delete Permanently</fluent-menu-item>
+                                </fluent-menu>
+                            </div>
+                        </div>
+                        <div class="project-body">
+                            <p class="project-desc">Redesign of the internal employee portal with improved user experience and additional self-service features.</p>
+                            <div class="project-meta">
+                                <span>16 documents</span>
+                                <span>Archived: 1 month ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Restore Project Dialog -->
+    <div class="dialog-backdrop" id="dialogBackdrop"></div>
+    <div class="restore-dialog" id="restoreDialog">
+        <div class="dialog-header">
+            <div class="dialog-title">Restore Project</div>
+            <div class="dialog-close" id="closeDialog">×</div>
+        </div>
+        <div class="dialog-body">
+            <p>Are you sure you want to restore the project "<span id="projectName">Legacy Website Migration</span>"?</p>
+            <p>This will make the project active again and allow team members to make changes to its contents.</p>
+        </div>
+        <div class="dialog-footer">
+            <fluent-button appearance="outline" id="cancelDialog">Cancel</fluent-button>
+            <fluent-button appearance="accent">Restore Project</fluent-button>
+        </div>
+    </div>
+
+    <!-- Chatbot -->
+    <div class="chatbot-toggle">
+        <i class="fas fa-comment-dots"></i>
+    </div>
+
+    <div class="chatbot-panel">
+        <div class="chatbot-header">
+            <div class="chatbot-title">AI Assistant</div>
+            <div class="chatbot-close">×</div>
+        </div>
+        <div class="chatbot-messages">
+            <div class="message bot">
+                <div class="message-content">
+                    Hello! How can I help you with archived projects today?
+                </div>
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <fluent-text-field placeholder="Ask a question..." style="flex-grow: 1; margin-right: 8px;"></fluent-text-field>
+            <fluent-button appearance="accent">Send</fluent-button>
+        </div>
+    </div>
+
+    <!-- Custom JavaScript -->
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize chatbot
+            initChatbot();
+            
+            // Handle status filter clicks
+            document.querySelectorAll('.status-filter-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.status-filter-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    
+                    // In a real app, this would filter the projects
+                    const status = item.textContent;
+                    if (status !== 'All') {
+                        alert(`Filtering projects by status: ${status}`);
+                    }
+                });
+            });
+            
+            // Handle restore dialog
+            const dialogBackdrop = document.getElementById('dialogBackdrop');
+            const restoreDialog = document.getElementById('restoreDialog');
+            const closeDialog = document.getElementById('closeDialog');
+            const cancelDialog = document.getElementById('cancelDialog');
+            const projectName = document.getElementById('projectName');
+            
+            function openRestoreDialog(name) {
+                projectName.textContent = name;
+                dialogBackdrop.style.display = 'block';
+                restoreDialog.style.display = 'block';
+            }
+            
+            function closeDialogFunc() {
+                dialogBackdrop.style.display = 'none';
+                restoreDialog.style.display = 'none';
+            }
+            
+            // Restore button for first project
+            document.getElementById('restoreProject1').addEventListener('click', () => {
+                openRestoreDialog('Legacy Website Migration');
+            });
+            
+            // Other restore buttons
+            document.querySelectorAll('.card-menu fluent-menu-item').forEach(item => {
+                if (item.textContent === 'Restore Project' && item.id !== 'restoreProject1') {
+                    item.addEventListener('click', () => {
+                        const projectCard = item.closest('.project-card');
+                        const name = projectCard.querySelector('.project-title').textContent;
+                        openRestoreDialog(name);
+                    });
+                }
+                
+                if (item.textContent === 'Delete Permanently') {
+                    item.addEventListener('click', () => {
+                        const projectCard = item.closest('.project-card');
+                        const name = projectCard.querySelector('.project-title').textContent;
+                        
+                        if (confirm(`Are you sure you want to permanently delete "${name}"? This action cannot be undone.`)) {
+                            alert(`Project "${name}" has been permanently deleted.`);
+                        }
+                    });
+                }
+            });
+            
+            closeDialog.addEventListener('click', closeDialogFunc);
+            cancelDialog.addEventListener('click', closeDialogFunc);
+            dialogBackdrop.addEventListener('click', closeDialogFunc);
+            
+            // Project card click
+            document.querySelectorAll('.project-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    // Don't navigate if clicking on the menu
+                    if (e.target.closest('.card-menu')) {
+                        return;
+                    }
+                    
+                    const projectName = card.querySelector('.project-title').textContent;
+                    alert(`Viewing archived project: ${projectName}`);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

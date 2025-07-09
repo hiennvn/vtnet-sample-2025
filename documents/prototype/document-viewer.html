@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTNet - Document Viewer</title>
+    
+    <!-- Import Fluent 2 Web Components -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@fluentui/web-components@2.5.16/dist/web-components.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fluentui/web-components/dist/web-components.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- PDF.js for PDF rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        /* Document Viewer Specific Styles */
+        .document-container {
+            display: flex;
+            height: calc(100vh - 140px);
+        }
+        
+        .document-sidebar {
+            width: 280px;
+            background-color: #ffffff;
+            border-right: 1px solid var(--neutral-stroke-rest);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        
+        .document-info {
+            padding: 24px;
+            border-bottom: 1px solid var(--neutral-stroke-rest);
+        }
+        
+        .document-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .document-title i {
+            margin-right: 12px;
+            font-size: 24px;
+        }
+        
+        .document-meta-list {
+            list-style: none;
+            padding: 0;
+            margin: 16px 0 0 0;
+        }
+        
+        .document-meta-item {
+            display: flex;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        
+        .meta-label {
+            width: 100px;
+            color: #616161;
+        }
+        
+        .meta-value {
+            flex-grow: 1;
+            font-weight: 500;
+        }
+        
+        .document-actions {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--neutral-stroke-rest);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .document-versions {
+            padding: 16px 24px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        
+        .versions-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #616161;
+        }
+        
+        .version-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .version-item {
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .version-item:hover {
+            background-color: rgba(0, 0, 0, 0.04);
+        }
+        
+        .version-item.current {
+            background-color: rgba(0, 120, 212, 0.1);
+            color: var(--accent-foreground-rest);
+            font-weight: 500;
+        }
+        
+        .version-date {
+            font-size: 12px;
+            color: #616161;
+        }
+        
+        .document-viewer {
+            flex-grow: 1;
+            background-color: #f5f5f5;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .viewer-toolbar {
+            height: 48px;
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--neutral-stroke-rest);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 16px;
+        }
+        
+        .viewer-toolbar-spacer {
+            flex-grow: 1;
+        }
+        
+        .viewer-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .pdf-container {
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+        
+        .page-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .page-number {
+            font-size: 14px;
+            color: #616161;
+        }
+        
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .pdf-page {
+            margin-bottom: 16px;
+        }
+        
+        .unsupported-format {
+            padding: 48px;
+            text-align: center;
+            color: #616161;
+        }
+        
+        .unsupported-format i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: #95a5a6;
+        }
+        
+        .unsupported-format h3 {
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo">
+            <i class="fas fa-project-diagram" style="color: #0078d4; font-size: 24px;"></i>
+            <h1>VTNet</h1>
+        </div>
+        <nav class="navigation">
+            <div class="nav-item" data-page="dashboard" onclick="window.location.href='index.html'">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item active" data-page="projects" onclick="window.location.href='index.html'">
+                <i class="fas fa-folder"></i>
+                <span>Projects</span>
+            </div>
+            <div class="nav-item" data-page="users" onclick="window.location.href='user-management.html'">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+            </div>
+            <div class="nav-item" data-page="settings">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="breadcrumb">
+                <span class="breadcrumb-item" data-page="home">Home</span> / 
+                <span class="breadcrumb-item" data-page="projects">Projects</span> /
+                <span class="breadcrumb-item" data-page="project-details" onclick="window.location.href='project-details.html'">Website Redesign</span> /
+                <span class="breadcrumb-item active" data-page="document">Design Guidelines.pdf</span>
+            </div>
+            <div class="user-actions">
+                <div class="user-profile">
+                    <div class="avatar-container">
+                        <fluent-avatar name="John Doe" size="32"></fluent-avatar>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="document-container">
+            <!-- Document Sidebar -->
+            <div class="document-sidebar">
+                <div class="document-info">
+                    <div class="document-title">
+                        <i class="fas fa-file-pdf" style="color: #e74c3c;"></i>
+                        <span>Design Guidelines.pdf</span>
+                    </div>
+                    <ul class="document-meta-list">
+                        <li class="document-meta-item">
+                            <span class="meta-label">Type</span>
+                            <span class="meta-value">PDF Document</span>
+                        </li>
+                        <li class="document-meta-item">
+                            <span class="meta-label">Size</span>
+                            <span class="meta-value">2.4 MB</span>
+                        </li>
+                        <li class="document-meta-item">
+                            <span class="meta-label">Created</span>
+                            <span class="meta-value">May 18, 2023</span>
+                        </li>
+                        <li class="document-meta-item">
+                            <span class="meta-label">Modified</span>
+                            <span class="meta-value">3 days ago</span>
+                        </li>
+                        <li class="document-meta-item">
+                            <span class="meta-label">Owner</span>
+                            <span class="meta-value">Sarah Johnson</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="document-actions">
+                    <fluent-button appearance="accent" style="width: 100%;">
+                        <i class="fas fa-download" style="margin-right: 8px;"></i>
+                        Download
+                    </fluent-button>
+                    <fluent-button appearance="outline" style="width: 100%;">
+                        <i class="fas fa-upload" style="margin-right: 8px;"></i>
+                        Upload New Version
+                    </fluent-button>
+                </div>
+                
+                <div class="document-versions">
+                    <div class="versions-title">VERSION HISTORY</div>
+                    <ul class="version-list">
+                        <li class="version-item current">
+                            <span>Version 3</span>
+                            <span class="version-date">3 days ago</span>
+                        </li>
+                        <li class="version-item">
+                            <span>Version 2</span>
+                            <span class="version-date">May 25, 2023</span>
+                        </li>
+                        <li class="version-item">
+                            <span>Version 1</span>
+                            <span class="version-date">May 18, 2023</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Document Viewer -->
+            <div class="document-viewer">
+                <div class="viewer-toolbar">
+                    <div class="page-controls">
+                        <fluent-button appearance="stealth">
+                            <i class="fas fa-chevron-left"></i>
+                        </fluent-button>
+                        <span class="page-number">Page 1 of 5</span>
+                        <fluent-button appearance="stealth">
+                            <i class="fas fa-chevron-right"></i>
+                        </fluent-button>
+                    </div>
+                    
+                    <div class="viewer-toolbar-spacer"></div>
+                    
+                    <div class="zoom-controls">
+                        <fluent-button appearance="stealth">
+                            <i class="fas fa-search-minus"></i>
+                        </fluent-button>
+                        <span>100%</span>
+                        <fluent-button appearance="stealth">
+                            <i class="fas fa-search-plus"></i>
+                        </fluent-button>
+                    </div>
+                </div>
+                
+                <div class="viewer-content" id="viewerContent">
+                    <!-- PDF content will be rendered here -->
+                    <div class="unsupported-format">
+                        <i class="fas fa-file-pdf"></i>
+                        <h3>PDF Preview</h3>
+                        <p>In a real implementation, the PDF would be rendered here using PDF.js.</p>
+                        <p>For this prototype, we're showing this placeholder instead.</p>
+                        <fluent-button appearance="accent" style="margin-top: 16px;">
+                            <i class="fas fa-download" style="margin-right: 8px;"></i>
+                            Download to View
+                        </fluent-button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Chatbot -->
+    <div class="chatbot-toggle">
+        <i class="fas fa-comment-dots"></i>
+    </div>
+
+    <div class="chatbot-panel">
+        <div class="chatbot-header">
+            <div class="chatbot-title">AI Assistant</div>
+            <div class="chatbot-close">×</div>
+        </div>
+        <div class="chatbot-messages">
+            <div class="message bot">
+                <div class="message-content">
+                    Hello! How can I help you with the "Design Guidelines.pdf" document?
+                </div>
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <fluent-text-field placeholder="Ask a question about this document..." style="flex-grow: 1; margin-right: 8px;"></fluent-text-field>
+            <fluent-button appearance="accent">Send</fluent-button>
+        </div>
+    </div>
+
+    <!-- Custom JavaScript -->
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize chatbot
+            initChatbot();
+            
+            // Handle version item clicks
+            document.querySelectorAll('.version-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.version-item').forEach(v => v.classList.remove('current'));
+                    item.classList.add('current');
+                    
+                    // In a real app, this would load the selected version
+                    const version = item.querySelector('span').textContent;
+                    alert(`Loading ${version}`);
+                });
+            });
+            
+            // Handle page navigation
+            const prevButton = document.querySelector('.page-controls fluent-button:first-child');
+            const nextButton = document.querySelector('.page-controls fluent-button:last-child');
+            const pageNumber = document.querySelector('.page-number');
+            let currentPage = 1;
+            const totalPages = 5;
+            
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    pageNumber.textContent = `Page ${currentPage} of ${totalPages}`;
+                }
+            });
+            
+            nextButton.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    pageNumber.textContent = `Page ${currentPage} of ${totalPages}`;
+                }
+            });
+            
+            // Handle zoom controls
+            const zoomOutButton = document.querySelector('.zoom-controls fluent-button:first-child');
+            const zoomInButton = document.querySelector('.zoom-controls fluent-button:last-child');
+            const zoomLevel = document.querySelector('.zoom-controls span');
+            let currentZoom = 100;
+            
+            zoomOutButton.addEventListener('click', () => {
+                if (currentZoom > 50) {
+                    currentZoom -= 25;
+                    zoomLevel.textContent = `${currentZoom}%`;
+                }
+            });
+            
+            zoomInButton.addEventListener('click', () => {
+                if (currentZoom < 200) {
+                    currentZoom += 25;
+                    zoomLevel.textContent = `${currentZoom}%`;
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

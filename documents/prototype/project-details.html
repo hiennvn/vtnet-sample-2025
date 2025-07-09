@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTNet - Project Details</title>
+    
+    <!-- Import Fluent 2 Web Components -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@fluentui/web-components@2.5.16/dist/web-components.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fluentui/web-components/dist/web-components.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <style>
+        /* Project Details Specific Styles */
+        .project-header {
+            padding: 24px;
+            background-color: #ffffff;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            margin-bottom: 24px;
+        }
+        
+        .project-header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .project-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .project-meta {
+            display: flex;
+            gap: 24px;
+            margin-top: 16px;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .meta-item i {
+            margin-right: 8px;
+            color: var(--accent-foreground-rest);
+        }
+        
+        .document-area {
+            background-color: #ffffff;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        .document-toolbar {
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--neutral-stroke-rest);
+        }
+        
+        .document-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .document-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .document-item, .folder-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 24px;
+            border-bottom: 1px solid var(--neutral-stroke-rest);
+            cursor: pointer;
+            transition: background-color 0.1s;
+        }
+        
+        .document-item:hover, .folder-item:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .document-item i, .folder-item i {
+            margin-right: 12px;
+            font-size: 18px;
+        }
+        
+        .folder-item i {
+            color: #f7c948;
+        }
+        
+        .document-item i.fa-file-pdf {
+            color: #e74c3c;
+        }
+        
+        .document-item i.fa-file-word {
+            color: #3498db;
+        }
+        
+        .document-item i.fa-file-excel {
+            color: #2ecc71;
+        }
+        
+        .document-item i.fa-file-powerpoint {
+            color: #e67e22;
+        }
+        
+        .document-item i.fa-file-alt {
+            color: #95a5a6;
+        }
+        
+        .document-name {
+            flex-grow: 1;
+        }
+        
+        .document-meta {
+            color: #616161;
+            font-size: 12px;
+            margin-left: 16px;
+        }
+        
+        .breadcrumb-path {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 16px;
+        }
+        
+        .breadcrumb-path .separator {
+            color: #616161;
+            font-size: 12px;
+            margin: 0 4px;
+        }
+        
+        .breadcrumb-path .folder {
+            color: var(--accent-foreground-rest);
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .breadcrumb-path .current {
+            font-weight: 600;
+            color: var(--neutral-foreground-rest);
+        }
+        
+        .empty-state {
+            padding: 48px 24px;
+            text-align: center;
+            color: #616161;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: #95a5a6;
+        }
+        
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--neutral-stroke-rest);
+        }
+        
+        .tab {
+            padding: 16px 24px;
+            cursor: pointer;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab.active {
+            color: var(--accent-foreground-rest);
+            border-bottom-color: var(--accent-foreground-rest);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="logo">
+            <i class="fas fa-project-diagram" style="color: #0078d4; font-size: 24px;"></i>
+            <h1>VTNet</h1>
+        </div>
+        <nav class="navigation">
+            <div class="nav-item" data-page="dashboard" onclick="window.location.href='index.html'">
+                <i class="fas fa-home"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="nav-item active" data-page="projects" onclick="window.location.href='index.html'">
+                <i class="fas fa-folder"></i>
+                <span>Projects</span>
+            </div>
+            <div class="nav-item" data-page="users" onclick="window.location.href='user-management.html'">
+                <i class="fas fa-users"></i>
+                <span>Users</span>
+            </div>
+            <div class="nav-item" data-page="settings">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="breadcrumb">
+                <span class="breadcrumb-item" data-page="home">Home</span> / 
+                <span class="breadcrumb-item" data-page="projects">Projects</span> /
+                <span class="breadcrumb-item active" data-page="project-details">Website Redesign</span>
+            </div>
+            <div class="user-actions">
+                <div class="search-container">
+                    <fluent-search placeholder="Search in this project..."></fluent-search>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar-container">
+                        <fluent-avatar name="John Doe" size="32"></fluent-avatar>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <!-- Project Header -->
+            <div class="project-header">
+                <div class="project-header-top">
+                    <h1 class="page-title">Website Redesign</h1>
+                    <div class="project-actions">
+                        <fluent-button appearance="outline">Edit Project</fluent-button>
+                        <fluent-button appearance="outline" onclick="window.location.href='project-members.html'">Manage Members</fluent-button>
+                        <fluent-menu>
+                            <fluent-button slot="trigger" appearance="outline">
+                                <i class="fas fa-ellipsis-h"></i>
+                            </fluent-button>
+                            <fluent-menu-item>Archive Project</fluent-menu-item>
+                            <fluent-menu-item>Delete Project</fluent-menu-item>
+                        </fluent-menu>
+                    </div>
+                </div>
+                
+                <p class="project-description">
+                    Redesigning the corporate website with new branding and improved user experience.
+                </p>
+                
+                <div class="project-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Created: May 15, 2023</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-user"></i>
+                        <span>Project Manager: Sarah Johnson</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-tag"></i>
+                        <span>Status: <span class="project-status status-active">Active</span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab active">Documents</div>
+                <div class="tab" onclick="window.location.href='project-members.html'">Members</div>
+                <div class="tab">Activity</div>
+            </div>
+            
+            <!-- Document Area -->
+            <div class="document-area">
+                <div class="document-toolbar">
+                    <div class="breadcrumb-path">
+                        <span class="folder">Project Root</span>
+                        <span class="separator">/</span>
+                        <span class="folder">Design Documents</span>
+                        <span class="separator">/</span>
+                        <span class="current">UI Mockups</span>
+                    </div>
+                    <div class="document-actions">
+                        <fluent-button appearance="accent">
+                            <i class="fas fa-upload" style="margin-right: 8px;"></i>
+                            Upload
+                        </fluent-button>
+                        <fluent-button appearance="outline">
+                            <i class="fas fa-folder-plus" style="margin-right: 8px;"></i>
+                            New Folder
+                        </fluent-button>
+                    </div>
+                </div>
+                
+                <!-- Document list -->
+                <div class="document-list">
+                    <div class="document-item folder">
+                        <div class="document-icon">
+                            <i class="fas fa-folder"></i>
+                        </div>
+                        <div class="document-info">
+                            <div class="document-name">Homepage Designs</div>
+                            <div class="document-meta">
+                                <span>4 items</span>
+                            </div>
+                        </div>
+                        <div class="document-actions">
+                            <fluent-button appearance="stealth">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </fluent-button>
+                        </div>
+                    </div>
+                    
+                    <div class="document-item folder">
+                        <div class="document-icon">
+                            <i class="fas fa-folder"></i>
+                        </div>
+                        <div class="document-info">
+                            <div class="document-name">Product Pages</div>
+                            <div class="document-meta">
+                                <span>6 items</span>
+                            </div>
+                        </div>
+                        <div class="document-actions">
+                            <fluent-button appearance="stealth">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </fluent-button>
+                        </div>
+                    </div>
+                    
+                    <div class="document-item" onclick="window.location.href='document-viewer.html'">
+                        <div class="document-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="document-info">
+                            <div class="document-name">Design Guidelines.pdf</div>
+                            <div class="document-meta">
+                                <span>Added by John Doe</span>
+                                <span>2 days ago</span>
+                            </div>
+                        </div>
+                        <div class="document-actions">
+                            <fluent-button appearance="stealth">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </fluent-button>
+                        </div>
+                    </div>
+                    <div class="document-item" onclick="window.location.href='document-viewer.html'">
+                        <div class="document-icon">
+                            <i class="fas fa-file-word"></i>
+                        </div>
+                        <div class="document-info">
+                            <div class="document-name">Project Requirements.docx</div>
+                            <div class="document-meta">
+                                <span>Added by Sarah Johnson</span>
+                                <span>1 week ago</span>
+                            </div>
+                        </div>
+                        <div class="document-actions">
+                            <fluent-button appearance="stealth">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </fluent-button>
+                        </div>
+                    </div>
+                    
+                    <div class="document-item" onclick="window.location.href='document-viewer.html'">
+                        <div class="document-icon">
+                            <i class="fas fa-file-powerpoint"></i>
+                        </div>
+                        <div class="document-info">
+                            <div class="document-name">Client Presentation.pptx</div>
+                            <div class="document-meta">
+                                <span>Added by Michael Chen</span>
+                                <span>5 days ago</span>
+                            </div>
+                        </div>
+                        <div class="document-actions">
+                            <fluent-button appearance="stealth">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </fluent-button>
+                        </div>
+                    </div>
+                    
+                    <div class="document-item" onclick="window.location.href='document-viewer.html'">
+                        <div class="document-icon">
+                            <i class="fas fa-file-image"></i>
+                        </div>
+                        <div class="document-info">
+                            <div class="document-name">Logo Assets.png</div>
+                            <div class="document-meta">
+                                <span>Added by Emily Rodriguez</span>
+                                <span>1 week ago</span>
+                            </div>
+                        </div>
+                        <div class="document-actions">
+                            <fluent-button appearance="stealth">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </fluent-button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Chatbot -->
+    <div class="chatbot-toggle">
+        <i class="fas fa-comment-dots"></i>
+    </div>
+
+    <div class="chatbot-panel">
+        <div class="chatbot-header">
+            <div class="chatbot-title">AI Assistant</div>
+            <div class="chatbot-close">×</div>
+        </div>
+        <div class="chatbot-messages">
+            <div class="message bot">
+                <div class="message-content">
+                    Hello! How can I help you with the "Website Redesign" project today?
+                </div>
+            </div>
+        </div>
+        <div class="chatbot-input">
+            <fluent-text-field placeholder="Ask a question about this project..." style="flex-grow: 1; margin-right: 8px;"></fluent-text-field>
+            <fluent-button appearance="accent">Send</fluent-button>
+        </div>
+    </div>
+
+    <!-- Custom JavaScript -->
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize chatbot
+            initChatbot();
+            
+            // Add click handlers for document items
+            document.querySelectorAll('.document-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const fileName = item.querySelector('.document-name').textContent;
+                    window.location.href = `document-viewer.html?name=${encodeURIComponent(fileName)}`;
+                });
+            });
+            
+            // Add click handlers for folder items
+            document.querySelectorAll('.folder-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const folderName = item.querySelector('.document-name').textContent;
+                    // In a real app, this would navigate to the folder
+                    alert(`Opening folder: ${folderName}`);
+                });
+            });
+            
+            // Add click handlers for breadcrumb path
+            document.querySelectorAll('.breadcrumb-path .folder').forEach(folder => {
+                folder.addEventListener('click', () => {
+                    // In a real app, this would navigate to the folder
+                    alert(`Navigating to: ${folder.textContent}`);
+                });
+            });
+            
+            // Add click handlers for tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // In a real app, this would switch the content area
+                    if (tab.textContent !== 'Documents') {
+                        alert(`Switching to ${tab.textContent} tab`);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

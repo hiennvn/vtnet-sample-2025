@@ -1,0 +1,30 @@
+spring:
+  # Production Database Configuration
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:pdms}?useSSL=true&serverTimezone=UTC
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+    
+  # Elasticsearch Configuration
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URI:http://localhost:9200}
+    
+# Server Configuration
+server:
+  port: ${PORT:8080}
+  
+# Storage Configuration for Production
+storage:
+  location: ${STORAGE_LOCATION:/data/pdms/storage}
+
+# Logging Configuration for Production
+logging:
+  level:
+    root: WARN
+    com.vtnet.pdms: INFO
+    org.springframework.web: INFO 
