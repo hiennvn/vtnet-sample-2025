@@ -72,5 +72,11 @@ From checklist @4.checklist_us_2.1_detail.md , implement "3. User Management Pag
 
 
 --- TDD ---
+1. AI Agent / Sonet-3.7: @technical-tutorials.mdc 
+From the user stories in @2.1.userstories_project_management.md , write the implementation checklist with detail steps to 4.checklist_us.2.1.2.md file.
+
+Remember 2 things:
+1. Use existing database schema in @V1__Initial_Schema.sql for new entity. I don't want to update the database schema.
+2. Use Test Driven Development, so you need to create the code structure without detail implementation, write the unit test first, then implement the functions later
 
 --- TESTING ---

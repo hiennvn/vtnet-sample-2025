@@ -55,7 +55,7 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    @PreAuthorize("hasAuthority('DIRECTOR')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public UserResponseDTO createUser(UserCreateDTO userDto) {
         logger.info("Creating new user with email: {}", userDto.getEmail());
 
@@ -82,7 +82,7 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    @PreAuthorize("hasAuthority('DIRECTOR') or @securityUtils.isCurrentUser(#id)")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') or @securityUtils.isCurrentUser(#id)")
     public UserResponseDTO updateUser(Long id, UserUpdateDTO userDto) {
         logger.info("Updating user with ID: {}", id);
 
@@ -115,7 +115,7 @@ public class UserServiceImpl implements UserService {
      * {@inheritDoc}
      */
     @Override
-    @PreAuthorize("hasAuthority('DIRECTOR')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public void deleteUser(Long id) {
         logger.info("Deleting user with ID: {}", id);
 
@@ -134,7 +134,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasAuthority('DIRECTOR') or @securityUtils.isCurrentUser(#id)")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN') or @securityUtils.isCurrentUser(#id)")
     public UserResponseDTO getUserById(Long id) {
         logger.debug("Fetching user with ID: {}", id);
 
@@ -149,7 +149,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasAuthority('DIRECTOR')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public Page<UserResponseDTO> getAllUsers(Pageable pageable) {
         logger.debug("Fetching all users with pagination");
 
@@ -162,7 +162,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasAuthority('DIRECTOR')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public Page<UserResponseDTO> searchUsers(String query, Pageable pageable) {
         logger.debug("Searching users with query: {}", query);
 

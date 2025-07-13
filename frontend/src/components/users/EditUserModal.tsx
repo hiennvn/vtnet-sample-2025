@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '../../redux/store';
 import { fetchUserById, updateUser, selectSelectedUser } from '../../redux/slices/userSlice';
 import { Role, User } from '../../types/user';
@@ -47,40 +47,61 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
     roleIds: [],
   });
   const [errors, setErrors] = useState<FormErrors>({});
+  
+  // Initialize form data from selectedUser
+  const initializeFormData = useCallback((user: User) => {
+    setFormData({
+      name: user.name,
+      email: user.email,
+      username: user.username || '',
+      password: '',
+      active: user.active,
+      roleIds: user.roles.map((role: Role) => role.id),
+    });
+    setIsLoading(false);
+  }, []);
 
   // Load user data when modal opens
   useEffect(() => {
+    let isMounted = true;
+    let fetchRequested = false;
+    
     if (isOpen && userId) {
       setIsLoading(true);
-      dispatch(fetchUserById(userId))
-        .unwrap()
-        .then(() => {
-          setIsLoading(false);
-        })
-        .catch(() => {
-          toastService.showError('Failed to load user data', {
-            showRetry: true,
-            onRetry: () => dispatch(fetchUserById(userId)),
+      
+      // Only fetch if we need to
+      if (!selectedUser || selectedUser.id !== userId) {
+        fetchRequested = true;
+        dispatch(fetchUserById(userId))
+          .unwrap()
+          .then((user) => {
+            if (isMounted) {
+              initializeFormData(user);
+            }
+          })
+          .catch(() => {
+            if (isMounted) {
+              toastService.showError('Failed to load user data', {
+                showRetry: true,
+                onRetry: () => {
+                  if (isMounted && isOpen) {
+                    dispatch(fetchUserById(userId));
+                  }
+                },
+              });
+              onClose();
+            }
           });
-          onClose();
-        });
+      } else if (selectedUser) {
+        // We already have the user data
+        initializeFormData(selectedUser);
+      }
     }
-  }, [dispatch, isOpen, userId, onClose]);
-
-  // Update form data when user data is loaded
-  useEffect(() => {
-    if (selectedUser) {
-      setFormData({
-        name: selectedUser.name,
-        email: selectedUser.email,
-        username: selectedUser.username || '',
-        password: '',
-        active: selectedUser.active,
-        roleIds: selectedUser.roles.map((role: Role) => role.id),
-      });
-      setIsLoading(false);
-    }
-  }, [selectedUser]);
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [dispatch, isOpen, userId, onClose, selectedUser, initializeFormData]);
 
   if (!isOpen) return null;
 
