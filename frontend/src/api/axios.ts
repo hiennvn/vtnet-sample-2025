@@ -1,41 +1,47 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
-
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+// Create axios instance with default config
+const api = axios.create({
+  baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Add a request interceptor
-apiClient.interceptors.request.use(
-  config => {
+// Request interceptor for adding auth token
+api.interceptors.request.use(
+  (config) => {
     const token = localStorage.getItem('auth_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  error => {
+  (error) => {
     return Promise.reject(error);
   }
 );
 
-// Add a response interceptor
-apiClient.interceptors.response.use(
-  response => {
+// Response interceptor for handling common errors
+api.interceptors.response.use(
+  (response) => {
     return response;
   },
-  error => {
-    // Handle 401 Unauthorized errors (token expired)
+  (error) => {
+    // Handle session expiration
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem('auth_token');
-      window.location.href = '/login';
+      // Check if not on login page already
+      if (!window.location.pathname.includes('/login')) {
+        // Clear auth data
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_data');
+        
+        // Redirect to login
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
 );
 
-export default apiClient; 
+export default api; 

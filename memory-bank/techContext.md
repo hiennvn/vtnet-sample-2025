@@ -30,22 +30,29 @@
 
 ### AI & Search
 - **LLM Integration**: OpenAI API or Google Gemini API
-- **Vector Database**: Milvus or Pinecone for embeddings storage
+- **Vector Database**: Qdrant for embeddings storage
 - **RAG Implementation**: Custom retrieval-augmented generation
 - **Embeddings**: Text embeddings for semantic search
 
 ### DevOps & Infrastructure
 - **Containerization**: Docker
-- **Orchestration**: Docker Compose (development), Kubernetes (production)
-- **CI/CD**: GitHub Actions or Jenkins
-- **Monitoring**: Prometheus and Grafana
-- **Logging**: ELK Stack (Elasticsearch, Logstash, Kibana)
+- **Container Orchestration**: Docker Compose
+- **Base Images**: 
+  - Backend: openjdk:17-slim
+  - Frontend: node:18-alpine for build, nginx:stable-alpine for runtime
+  - Database: mysql:8.0
+  - Search: elasticsearch:8.11.1
+  - Vector DB: qdrant/qdrant:latest
+- **Reverse Proxy**: Nginx for production deployment
+- **Health Checks**: Implemented for all containers in production
+- **Resource Management**: CPU and memory limits defined in production
 
 ## Development Environment
 - **Platform**: Any modern IDE with Java and TypeScript support
 - **Operating System**: Cross-platform (developed on macOS)
-- **Build Tools**: Maven or Gradle for backend, npm/yarn for frontend
+- **Build Tools**: Maven for backend, npm/yarn for frontend
 - **Version Control**: Git
+- **Local Environment**: Docker Compose for development environment
 
 ## Technical Constraints
 1. **Local Storage**: Document files must be stored in the local file system
@@ -53,6 +60,7 @@
 3. **Performance**: System must handle large document repositories efficiently
 4. **Scalability**: Architecture must support future scaling needs
 5. **Compatibility**: Document viewer must support common file formats (PDF, DOCX, XLSX, etc.)
+6. **Environment Consistency**: Docker ensures consistent development and production environments
 
 ## System Architecture
 
@@ -91,19 +99,65 @@ The system follows Clean Architecture principles with Domain-Driven Design:
 - **Database**: MySQL for structured data storage
 - **File System**: Local storage for document files
 - **Elasticsearch**: Document content indexing and search
-- **Vector Database**: Semantic search capabilities
+- **Qdrant**: Vector database for semantic search capabilities
 - **LLM API**: AI-powered chatbot functionality
+
+## Docker Configuration
+
+### Development Environment
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         Docker Compose Network                      │
+│                                                                     │
+│  ┌────────────┐   ┌────────────┐   ┌───────────┐   ┌─────────────┐  │
+│  │  Frontend  │   │  Backend   │   │  MySQL    │   │ Elasticsearch│  │
+│  │  Container │   │  Container │   │ Container │   │  Container   │  │
+│  └────────────┘   └────────────┘   └───────────┘   └─────────────┘  │
+│                                                                     │
+│                              ┌────────────┐                         │
+│                              │   Qdrant   │                         │
+│                              │  Container │                         │
+│                              └────────────┘                         │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Production Environment
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         Docker Compose Network                      │
+│                                                                     │
+│  ┌────────────┐   ┌────────────┐   ┌───────────┐   ┌─────────────┐  │
+│  │   Nginx    │   │  Frontend  │   │  Backend  │   │    MySQL    │  │
+│  │  Container ├───┤  Container │   │ Container │   │  Container  │  │
+│  └─────┬──────┘   └────────────┘   └─────┬─────┘   └─────────────┘  │
+│        │                                 │                          │
+│    External                              │                          │
+│    Requests                              │                          │
+│        │                                 │                          │
+│        │                          ┌─────┴─────┐   ┌─────────────┐  │
+│        │                          │Elasticsearch│   │   Qdrant    │  │
+│        ▼                          │  Container  │   │  Container  │  │
+│  Load Balancer                    └─────────────┘   └─────────────┘  │
+│  (Future)                                                            │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+## Volume Management
+- **MySQL Data**: Persistent volume for database storage
+- **Elasticsearch Data**: Persistent volume for search indices
+- **Qdrant Data**: Persistent volume for vector embeddings
+- **Document Storage**: Volume mount for document file storage
+- **Nginx Configuration**: Volume mount for Nginx settings
 
 ## Development Setup Requirements
 1. Java 17 JDK
-2. MySQL 8.0 database
-3. Node.js and npm/yarn
-4. Docker and Docker Compose
-5. Git for version control
+2. Docker and Docker Compose
+3. Git for version control
 
 ## Implementation Strategy
 - Domain-first development approach
 - Test-driven development for core functionality
 - Incremental feature implementation
 - Continuous integration with automated testing
-- Regular performance monitoring and optimization 
+- Regular performance monitoring and optimization
+- Docker Compose for local development and testing 

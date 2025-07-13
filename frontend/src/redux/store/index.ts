@@ -1,20 +1,20 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 
-// Import reducers when they are created
-// import authReducer from '../slices/authSlice';
+// Import reducers
+import userReducer from '../slices/userSlice';
+import roleReducer from '../slices/roleSlice';
+import authReducer from '../slices/authSlice';
 
 export const store = configureStore({
   reducer: {
-    // auth: authReducer,
-    // Add other reducers here as they are implemented
+    auth: authReducer,
+    users: userReducer,
+    roles: roleReducer,
   },
-  middleware: (getDefaultMiddleware) =>
+  middleware: (getDefaultMiddleware) => 
     getDefaultMiddleware({
-      serializableCheck: {
-        // Ignore these action types
-        ignoredActions: ['persist/PERSIST'],
-      },
+      serializableCheck: false,
     }),
 });
 

@@ -1,15 +1,83 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { Provider } from 'react-redux';
 import { store } from './redux/store';
 import { createTheme } from '@mui/material';
+import ToastContainer from './components/common/ToastContainer';
+import MainLayout from './layouts/MainLayout';
+import './components/common/Toast.css';
+import { useAuth } from './hooks/useAuth';
+
+// Import pages
+import UserManagementPage from './pages/UserManagementPage';
+import NotFoundPage from './pages/NotFoundPage';
+import LoginPage from './pages/LoginPage';
 
 const theme = createTheme();
 
-// Import pages when they are created
-// import HomePage from './pages/HomePage';
-// import LoginPage from './pages/LoginPage';
-// import NotFoundPage from './pages/NotFoundPage';
+// Protected route component
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated } = useAuth();
+  const location = useLocation();
+
+  if (!isAuthenticated) {
+    // Redirect to login page with return url
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return <>{children}</>;
+}
+
+function AppRoutes() {
+  return (
+    <Routes>
+      {/* Public routes */}
+      <Route path="/login" element={<LoginPage />} />
+      
+      {/* Protected routes with layout */}
+      <Route path="/" element={
+        <ProtectedRoute>
+          <MainLayout>
+            <Navigate to="/users" replace />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/users" element={
+        <ProtectedRoute>
+          <MainLayout>
+            <UserManagementPage />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/projects" element={
+        <ProtectedRoute>
+          <MainLayout>
+            <div>Projects Page</div>
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+      
+      <Route path="/documents" element={
+        <ProtectedRoute>
+          <MainLayout>
+            <div>Documents Page</div>
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+      
+      {/* 404 Page */}
+      <Route path="*" element={
+        <ProtectedRoute>
+          <MainLayout>
+            <NotFoundPage />
+          </MainLayout>
+        </ProtectedRoute>
+      } />
+    </Routes>
+  );
+}
 
 function App() {
   return (
@@ -17,13 +85,11 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>
-          <Routes>
-            {/* Define routes when pages are created */}
-            <Route path="/" element={<div>Home Page</div>} />
-            <Route path="/login" element={<div>Login Page</div>} />
-            <Route path="*" element={<div>Not Found</div>} />
-          </Routes>
+          <AppRoutes />
         </Router>
+        
+        {/* Toast notification container */}
+        <ToastContainer position="top-right" maxToasts={5} />
       </ThemeProvider>
     </Provider>
   );

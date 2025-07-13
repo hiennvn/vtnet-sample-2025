@@ -45,6 +45,32 @@ REMOVE core.mdc to Manual
 
 5. AI Agent / Sonet-3.7: Follow the checklist @3.3.implement_checklist.md , implement step "3.1. Project Setup" (line 67). Remember to update the checklist.
 
+mysql -u root -p
+
+6. AI Agent / Sonet-3.7: @technical-tutorials.mdc 
+From the tech structure in @3.2.tech_structure.md , write the checklist to develop the user stories in @2.1.userstories_project_management.md to 4.checklist_us.2.1.md file. Write it as detail as possible for backend and frontend, the database is existing and must not be changed.
+
+7. AI Agent / Sonet-3.7: @technical-tutorials.mdc 
+Write the detail checklist to implement "US1.3: Create and Manage User Accounts" in @4.checklist_us.2.1.md to 4.checklist_us_2.1_detail.md
+
+8. AI Agent / Sonet-3.7: Follow@4.checklist_us_2.1_detail.md, implement "1.1 Create User Entity" (line 9). Remember to update the checklist
+
+9. AI Agent / Sonet-3.7: Follow@4.checklist_us_2.1_detail.md, implement 1.2, 1.3, 1.4, 1.5 (line 22 to 66). Remember to update the checklist
+
+10. AI Agent / Sonet-3.7: Follow@4.checklist_us_2.1_detail.md, implement "2. User Repository" (line 68). Remember to update the checklist
+
+11. AI Agent / Sonet-3.7: Follow@4.checklist_us_2.1_detail.md, implement "5. User Controller" (line 146). Remember to update the checklist
+
+12. AI Agent / Sonet-3.7: @react-typescript.mdc 
+Follow@4.checklist_us_2.1_detail.md, implement "1.1 Create User Interfaces" (line 212). Remember to update the checklist
+
+13. AI Agent / Sonet-3.7: @react-typescript.mdc 
+Follow @4.checklist_us_2.1_detail.md , implement 1.2, 1.3, 1.4 . Remember to update the checklist.
+
+14. AI Agent / Sonet-3.7: @react-typescript.mdc 
+From checklist @4.checklist_us_2.1_detail.md , implement "3. User Management Page" (line 280), use @user-management.html in @/prototype as the mockup. Remember to update the checklist
+
+
 --- TDD ---
 
 --- TESTING ---

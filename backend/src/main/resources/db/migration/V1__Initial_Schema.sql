@@ -160,7 +160,7 @@ INSERT INTO roles (name) VALUES ('ROLE_TEAM_MEMBER');
 
 -- Insert default admin user (password: admin)
 INSERT INTO users (email, password_hash, name) 
-VALUES ('admin@vtnet.com', '$2a$10$N/qM0V9hZ1KSjN4g.XwgxOV1bM.LJH8.x5fKYAV8nxxu0mIH.QXmi', 'System Administrator');
+VALUES ('admin@vtnet.com', '$2a$12$COBhaGrAA4od4aNE5LpnP.2Sp8FeR0260YTiMHimW1xG3clH67wzm', 'System Administrator');
 
 -- Assign admin role to admin user
 INSERT INTO user_roles (user_id, role_id) 

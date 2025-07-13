@@ -22,7 +22,7 @@
         <tika.version>2.9.1</tika.version>
         <pdfbox.version>3.0.1</pdfbox.version>
         <poi.version>5.2.5</poi.version>
-        <jjwt.version>0.12.3</jjwt.version>
+        <jjwt.version>0.11.5</jjwt.version>
     </properties>
     
     <dependencies>

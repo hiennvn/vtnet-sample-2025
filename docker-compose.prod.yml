@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  # Backend service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vtnet-backend
+    restart: unless-stopped
+    depends_on:
+      - mysql
+      - elasticsearch
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/vtnet_document_management?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=vtnet
+      - SPRING_DATASOURCE_PASSWORD=vtnet_password
+      - SPRING_ELASTICSEARCH_REST_URIS=http://elasticsearch:9200
+      - STORAGE_LOCATION=/app/uploads
+      - JWT_SECRET=${JWT_SECRET:-vtnet_secure_jwt_secret_key_2025}
+    volumes:
+      - ./backend/uploads:/app/uploads
+    ports:
+      - "8080:8080"
+    networks:
+      - vtnet-network
+
+  # Frontend service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+    container_name: vtnet-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    networks:
+      - vtnet-network
+
+  # MySQL database
+  mysql:
+    image: mysql:8.0
+    platform: linux/amd64
+    container_name: vtnet-mysql
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=vtnet_document_management
+      - MYSQL_USER=vtnet
+      - MYSQL_PASSWORD=vtnet_password
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root_password}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    networks:
+      - vtnet-network
+
+  # Elasticsearch service
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
+    platform: linux/amd64
+    container_name: vtnet-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - vtnet-network
+
+  # Vector database (Qdrant)
+  qdrant:
+    image: qdrant/qdrant:latest
+    platform: linux/amd64
+    container_name: vtnet-qdrant
+    restart: unless-stopped
+    volumes:
+      - qdrant-data:/qdrant/storage
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    networks:
+      - vtnet-network
+
+volumes:
+  mysql-data:
+  elasticsearch-data:
+  qdrant-data:
+
+networks:
+  vtnet-network:
+    driver: bridge 
