@@ -1,0 +1,51 @@
+spring:
+  # Test Database Configuration - Using H2 in-memory database for tests
+  datasource:
+    url: jdbc:h2:mem:pdms_test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+    hikari:
+      maximum-pool-size: 10
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+    show-sql: true
+    
+  # Disable Elasticsearch for tests
+  elasticsearch:
+    enabled: false
+    
+  # Disable Flyway for tests
+  flyway:
+    enabled: false
+    
+  # Security settings for tests
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-client-id
+            client-secret: test-client-secret
+            
+# Storage Configuration for Tests
+storage:
+  location: storage/test
+
+# JWT Configuration for Tests
+jwt:
+  secret: test_secret_key_for_unit_tests_with_minimum_length_of_32_chars
+  expiration: 3600000  # 1 hour in milliseconds
+
+# Logging Configuration for Tests
+logging:
+  level:
+    root: WARN
+    com.vtnet.pdms: DEBUG
+    org.hibernate.SQL: DEBUG 
