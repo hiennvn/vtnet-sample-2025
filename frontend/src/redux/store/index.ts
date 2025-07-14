@@ -5,12 +5,14 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import userReducer from '../slices/userSlice';
 import roleReducer from '../slices/roleSlice';
 import authReducer from '../slices/authSlice';
+import projectReducer from '../slices/projectSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     users: userReducer,
     roles: roleReducer,
+    projects: projectReducer,
   },
   middleware: (getDefaultMiddleware) => 
     getDefaultMiddleware({

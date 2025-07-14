@@ -1,7 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../redux/store';
-import { login, logout, refreshToken } from '../redux/slices/authSlice';
+import { login, logout, refreshToken, checkAuthState } from '../redux/slices/authSlice';
+
+// Define possible role formats
+interface RoleObject {
+  id: number;
+  name: string;
+}
+
+type Role = string | RoleObject;
 
 interface UseAuthReturn {
   isAuthenticated: boolean;
@@ -11,10 +19,10 @@ interface UseAuthReturn {
     id: number;
     name: string;
     email: string;
-    roles: string[];
+    roles: Role[];
   } | null;
-  loginUser: (email: string, password: string) => void;
-  logoutUser: () => void;
+  loginUser: (email: string, password: string) => Promise<void>;
+  logoutUser: () => Promise<void>;
   hasRole: (role: string) => boolean;
 }
 
@@ -22,10 +30,15 @@ export function useAuth(): UseAuthReturn {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, user, loading, error, accessToken, refreshToken: refreshTokenValue } = 
+  const { isAuthenticated, user, loading, error, accessToken } = 
     useAppSelector((state) => state.auth);
 
-  // Check token expiration and refresh if needed
+  // Check token presence on mount and route changes
+  useEffect(() => {
+    dispatch(checkAuthState());
+  }, [dispatch, location.pathname]);
+
+  // Set up token refresh interval
   useEffect(() => {
     if (isAuthenticated && accessToken) {
       // Set up token refresh
@@ -40,25 +53,38 @@ export function useAuth(): UseAuthReturn {
   }, [isAuthenticated, accessToken, dispatch]);
 
   // Handle login
-  const loginUser = async (email: string, password: string) => {
+  const loginUser = useCallback(async (email: string, password: string) => {
     await dispatch(login({ email, password }));
     
     // Get the redirect path from location state or default to home
-    const from = (location.state as any)?.from?.pathname || '/';
+    const from = location.state?.from?.pathname || '/';
     navigate(from, { replace: true });
-  };
+  }, [dispatch, navigate, location.state]);
 
   // Handle logout
-  const logoutUser = async () => {
+  const logoutUser = useCallback(async () => {
     await dispatch(logout());
     navigate('/login');
-  };
+  }, [dispatch, navigate]);
 
   // Check if user has a specific role
-  const hasRole = (role: string): boolean => {
+  const hasRole = useCallback((role: string): boolean => {
     if (!user || !user.roles) return false;
-    return user.roles.includes(role);
-  };
+    
+    return user.roles.some(userRole => {
+      if (typeof userRole === 'string') {
+        return userRole === role;
+      } 
+      
+      // Handle role as object
+      if (userRole && typeof userRole === 'object') {
+        const roleObj = userRole as RoleObject;
+        return roleObj.name === role;
+      }
+      
+      return false;
+    });
+  }, [user]);
 
   return {
     isAuthenticated,

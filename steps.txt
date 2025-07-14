@@ -84,4 +84,9 @@ Follow @4.checklist_us.2.1.2.md , implement the backend ("Backend Implementation
 
 docker-compose -f docker-compose.yml run --rm backend mvn test -Dtest=com.vtnet.pdms.interfaces.api.ProjectControllerTest
 
+3. AI Agent / Sonet-3.7: @react-typescript.mdc 
+@4.checklist_us.2.1.2.md Continue to implement the Frontend. Remember to update the checklist 
+
+npm run test
+
 --- TESTING ---

@@ -32,8 +32,9 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       // Check if not on login page already
       if (!window.location.pathname.includes('/login')) {
-        // Clear auth data
+        // Clear all auth data
         localStorage.removeItem('auth_token');
+        localStorage.removeItem('refresh_token');
         localStorage.removeItem('user_data');
         
         // Redirect to login

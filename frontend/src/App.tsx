@@ -7,11 +7,15 @@ import ToastContainer from './components/common/ToastContainer';
 import MainLayout from './layouts/MainLayout';
 import './components/common/Toast.css';
 import { useAuth } from './hooks/useAuth';
+import { useEffect } from 'react';
+import { initializeAuth } from './redux/slices/authSlice';
+import { useAppDispatch } from './redux/store';
 
 // Import pages
 import UserManagementPage from './pages/UserManagementPage';
 import NotFoundPage from './pages/NotFoundPage';
 import LoginPage from './pages/LoginPage';
+import ProjectsPage from './pages/ProjectsPage';
 
 const theme = createTheme();
 
@@ -28,54 +32,66 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Auth initializer component
+function AuthInitializer({ children }: { children: React.ReactNode }) {
+  const dispatch = useAppDispatch();
+  
+  useEffect(() => {
+    // Initialize authentication state on app startup
+    dispatch(initializeAuth());
+  }, [dispatch]);
+  
+  return <>{children}</>;
+}
+
 function AppRoutes() {
   return (
-    <Routes>
-      {/* Public routes */}
-      <Route path="/login" element={<LoginPage />} />
-      
-      {/* Protected routes with layout */}
-      <Route path="/" element={
-        <ProtectedRoute>
-          <MainLayout>
-            <Navigate to="/users" replace />
-          </MainLayout>
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/users" element={
-        <ProtectedRoute>
-          <MainLayout>
-            <UserManagementPage />
-          </MainLayout>
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/projects" element={
-        <ProtectedRoute>
-          <MainLayout>
-            <div>Projects Page</div>
-          </MainLayout>
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/documents" element={
-        <ProtectedRoute>
-          <MainLayout>
-            <div>Documents Page</div>
-          </MainLayout>
-        </ProtectedRoute>
-      } />
-      
-      {/* 404 Page */}
-      <Route path="*" element={
-        <ProtectedRoute>
-          <MainLayout>
-            <NotFoundPage />
-          </MainLayout>
-        </ProtectedRoute>
-      } />
-    </Routes>
+    <AuthInitializer>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/login" element={<LoginPage />} />
+        
+        {/* Protected routes with layout */}
+        <Route path="/" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Navigate to="/users" replace />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/users" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <UserManagementPage />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/projects" element={
+          <ProtectedRoute>
+            <ProjectsPage />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/documents" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <div>Documents Page</div>
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+        
+        {/* 404 Page */}
+        <Route path="*" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <NotFoundPage />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+      </Routes>
+    </AuthInitializer>
   );
 }
 

@@ -1,0 +1,49 @@
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  margin: 1rem 0;
+  text-align: center;
+}
+
+.empty-state p {
+  margin: 0.5rem 0;
+}
+
+.empty-state-hint {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-active {
+  background-color: #e6f7ed;
+  color: #0c6b3d;
+}
+
+.status-archived {
+  background-color: #f2f2f2;
+  color: #666;
+}
+
+.status-completed {
+  background-color: #e6f0ff;
+  color: #0047b3;
+}
+
+.status-on_hold {
+  background-color: #fff3e0;
+  color: #b35c00;
+} 

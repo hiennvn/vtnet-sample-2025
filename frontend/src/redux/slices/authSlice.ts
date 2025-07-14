@@ -17,6 +17,12 @@ interface AuthState {
   error: string | null;
 }
 
+interface AuthPayload {
+  user: User;
+  accessToken: string;
+  refreshToken: string | null;
+}
+
 const initialState: AuthState = {
   isAuthenticated: false,
   user: null,
@@ -26,26 +32,71 @@ const initialState: AuthState = {
   error: null,
 };
 
+// Initialize auth state from stored token and user data
+export const initializeAuth = createAsyncThunk(
+  'auth/initialize',
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        return rejectWithValue('No token found');
+      }
+      
+      // Try to get stored user data from localStorage
+      const userDataString = localStorage.getItem('user_data');
+      if (!userDataString) {
+        return rejectWithValue('No user data found');
+      }
+      
+      try {
+        // Parse the stored user data
+        const userData = JSON.parse(userDataString) as User;
+        
+        return {
+          user: userData,
+          accessToken: token,
+          refreshToken: localStorage.getItem('refresh_token')
+        } as AuthPayload;
+      } catch (parseError) {
+        // If parsing fails, clear invalid data
+        localStorage.removeItem('user_data');
+        return rejectWithValue('Invalid user data');
+      }
+    } catch (error: any) {
+      // If token is invalid, clear it
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_data');
+      return rejectWithValue(error.message || 'Failed to initialize authentication');
+    }
+  }
+);
+
 export const login = createAsyncThunk(
   'auth/login',
   async (credentials: { email: string; password: string }, { rejectWithValue }) => {
     try {
       const response = await authApi.login(credentials);
       
-      // Store tokens in localStorage
+      // Create user object from response
+      const user = {
+        id: response.userId,
+        name: response.name,
+        email: response.email,
+        roles: response.roles,
+      };
+      
+      // Store tokens and user data in localStorage
       localStorage.setItem('auth_token', response.accessToken);
       localStorage.setItem('refresh_token', response.refreshToken);
+      localStorage.setItem('user_data', JSON.stringify(user));
       
       return {
-        user: {
-          id: response.userId,
-          name: response.name,
-          email: response.email,
-          roles: response.roles,
-        },
+        user,
         accessToken: response.accessToken,
         refreshToken: response.refreshToken,
-      };
+      } as AuthPayload;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.error || 'Login failed');
     }
@@ -58,9 +109,10 @@ export const logout = createAsyncThunk(
     try {
       await authApi.logout();
       
-      // Clear tokens from localStorage
+      // Clear tokens and user data from localStorage
       localStorage.removeItem('auth_token');
       localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_data');
       
       return null;
     } catch (error: any) {
@@ -94,6 +146,7 @@ export const refreshToken = createAsyncThunk(
       // Clear tokens on refresh failure
       localStorage.removeItem('auth_token');
       localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_data');
       
       return rejectWithValue(error.response?.data?.error || 'Token refresh failed');
     }
@@ -107,15 +160,55 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    // Set authentication state based on token presence
+    checkAuthState: (state) => {
+      const token = localStorage.getItem('auth_token');
+      state.isAuthenticated = !!token;
+      state.accessToken = token;
+      state.refreshToken = localStorage.getItem('refresh_token');
+      
+      // Try to get user data from localStorage
+      const userDataString = localStorage.getItem('user_data');
+      if (userDataString) {
+        try {
+          state.user = JSON.parse(userDataString);
+        } catch (e) {
+          // If parsing fails, clear invalid data
+          localStorage.removeItem('user_data');
+          state.user = null;
+        }
+      }
+    }
   },
   extraReducers: (builder) => {
     builder
+      // Initialize Auth
+      .addCase(initializeAuth.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(initializeAuth.fulfilled, (state, action: PayloadAction<AuthPayload>) => {
+        state.isAuthenticated = true;
+        state.user = action.payload.user;
+        state.accessToken = action.payload.accessToken;
+        state.refreshToken = action.payload.refreshToken;
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(initializeAuth.rejected, (state) => {
+        state.isAuthenticated = false;
+        state.user = null;
+        state.accessToken = null;
+        state.refreshToken = null;
+        state.loading = false;
+      })
+      
       // Login
       .addCase(login.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(login.fulfilled, (state, action: PayloadAction<{ user: User; accessToken: string; refreshToken: string }>) => {
+      .addCase(login.fulfilled, (state, action: PayloadAction<AuthPayload>) => {
         state.isAuthenticated = true;
         state.user = action.payload.user;
         state.accessToken = action.payload.accessToken;
@@ -172,6 +265,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearError } = authSlice.actions;
+export const { clearError, checkAuthState } = authSlice.actions;
 
 export default authSlice.reducer; 
