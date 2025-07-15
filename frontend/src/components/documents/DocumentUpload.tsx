@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, ChangeEvent, FormEvent } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadDocument, resetUploadState } from '../../redux/slices/documentSlice';
-import { AppDispatch, RootState } from '../../redux/store';
+import { AppDispatch } from '../../redux/store';
 import './DocumentUpload.css';
 
 interface DocumentUploadProps {
@@ -13,31 +13,23 @@ interface DocumentUploadProps {
 const DocumentUpload: React.FC<DocumentUploadProps> = ({ projectId, folderId, onUploadComplete }) => {
   const dispatch = useDispatch<AppDispatch>();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [fileName, setFileName] = useState<string>('');
+  
+  const [name, setName] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState<boolean>(false);
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string>('');
+  
+  const { uploading, uploadSuccess, error } = useSelector((state: any) => state.documents);
 
-  const { uploading, uploadSuccess, error } = useSelector((state: RootState) => state.documents);
-
-  // Reset upload state when component unmounts
-  useEffect(() => {
-    return () => {
-      dispatch(resetUploadState());
-    };
-  }, [dispatch]);
-
-  // Handle successful upload
-  useEffect(() => {
+  // Reset state when upload is successful
+  React.useEffect(() => {
     if (uploadSuccess) {
-      // Reset form
-      setFileName('');
+      setName('');
       setFile(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
       
-      // Call the callback if provided
       if (onUploadComplete) {
         onUploadComplete();
       }
@@ -49,21 +41,22 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ projectId, folderId, on
     }
   }, [uploadSuccess, dispatch, onUploadComplete]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       setFile(selectedFile);
-      setFileName(selectedFile.name);
-      setValidationError(null);
+      
+      // If no name is set, use the file name
+      if (!name) {
+        const fileName = selectedFile.name.split('.')[0];
+        setName(fileName);
+      }
+      
+      setValidationError('');
     }
   };
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFileName(e.target.value);
-    setValidationError(null);
-  };
-
-  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(true);
@@ -75,11 +68,6 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ projectId, folderId, on
     setDragActive(false);
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -88,32 +76,46 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ projectId, folderId, on
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const selectedFile = e.dataTransfer.files[0];
       setFile(selectedFile);
-      setFileName(selectedFile.name);
-      setValidationError(null);
+      
+      // If no name is set, use the file name
+      if (!name) {
+        const fileName = selectedFile.name.split('.')[0];
+        setName(fileName);
+      }
+      
+      setValidationError('');
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate inputs
-    if (!fileName.trim()) {
+  const validateForm = (): boolean => {
+    if (!name.trim()) {
       setValidationError('Document name is required');
-      return;
+      return false;
     }
     
     if (!file) {
       setValidationError('Please select a file to upload');
+      return false;
+    }
+    
+    return true;
+  };
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
       return;
     }
     
-    // Dispatch upload action
-    dispatch(uploadDocument({
-      name: fileName,
-      projectId,
-      file,
-      folderId
-    }));
+    if (file) {
+      dispatch(uploadDocument({
+        name: name.trim(),
+        projectId,
+        file,
+        folderId
+      }));
+    }
   };
 
   return (
@@ -122,52 +124,42 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ projectId, folderId, on
       
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="documentName">Document Name</label>
+          <label htmlFor="document-name">Document Name</label>
           <input
+            id="document-name"
             type="text"
-            id="documentName"
-            value={fileName}
-            onChange={handleNameChange}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             placeholder="Enter document name"
             disabled={uploading}
-            required
           />
         </div>
         
         <div 
-          className={`drop-zone ${dragActive ? 'active' : ''}`}
-          onDragEnter={handleDragEnter}
-          onDragLeave={handleDragLeave}
+          className={`drop-zone ${dragActive ? 'active' : ''} ${file ? 'has-file' : ''}`}
           onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
           onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
         >
           <input
-            type="file"
             ref={fileInputRef}
+            type="file"
             onChange={handleFileChange}
-            className="file-input"
+            style={{ display: 'none' }}
             disabled={uploading}
           />
-          <div className="drop-zone-content">
-            {file ? (
-              <div className="selected-file">
-                <span className="file-name">{file.name}</span>
-                <span className="file-size">({(file.size / 1024).toFixed(2)} KB)</span>
-              </div>
-            ) : (
-              <>
-                <p>Drag & drop file here or</p>
-                <button 
-                  type="button" 
-                  className="browse-button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
-                >
-                  Browse Files
-                </button>
-              </>
-            )}
-          </div>
+          
+          {file ? (
+            <div className="selected-file">
+              <span className="file-name">{file.name}</span>
+              <span className="file-size">({(file.size / 1024).toFixed(2)} KB)</span>
+            </div>
+          ) : (
+            <div className="drop-message">
+              <span>Drag & drop a file here or click to browse</span>
+            </div>
+          )}
         </div>
         
         {validationError && <div className="error-message">{validationError}</div>}
@@ -177,8 +169,8 @@ const DocumentUpload: React.FC<DocumentUploadProps> = ({ projectId, folderId, on
         <div className="form-actions">
           <button 
             type="submit" 
-            className="upload-button"
-            disabled={uploading || !file}
+            className="upload-button" 
+            disabled={uploading}
           >
             {uploading ? 'Uploading...' : 'Upload Document'}
           </button>

@@ -44,4 +44,13 @@ public interface StorageService {
      * @return The absolute path
      */
     Path getPath(String filename);
+    
+    /**
+     * Creates a directory at the specified path relative to the root location.
+     *
+     * @param relativePath The path relative to the root location
+     * @return The created directory path
+     * @throws IOException If an I/O error occurs
+     */
+    Path createDirectory(String relativePath) throws IOException;
 } 

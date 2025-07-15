@@ -8,11 +8,14 @@ import com.vtnet.pdms.domain.repository.FolderRepository;
 import com.vtnet.pdms.domain.service.FolderService;
 import com.vtnet.pdms.domain.service.ProjectService;
 import com.vtnet.pdms.infrastructure.security.SecurityUtils;
+import com.vtnet.pdms.infrastructure.storage.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -25,6 +28,7 @@ public class FolderServiceImpl implements FolderService {
     private final FolderRepository folderRepository;
     private final ProjectService projectService;
     private final SecurityUtils securityUtils;
+    private final StorageService storageService;
 
     /**
      * Constructor with dependency injection.
@@ -32,15 +36,18 @@ public class FolderServiceImpl implements FolderService {
      * @param folderRepository Repository for folder operations
      * @param projectService Service for project operations
      * @param securityUtils Security utilities
+     * @param storageService Service for file storage operations
      */
     @Autowired
     public FolderServiceImpl(
             FolderRepository folderRepository,
             ProjectService projectService,
-            SecurityUtils securityUtils) {
+            SecurityUtils securityUtils,
+            StorageService storageService) {
         this.folderRepository = folderRepository;
         this.projectService = projectService;
         this.securityUtils = securityUtils;
+        this.storageService = storageService;
     }
 
     @Override
@@ -100,7 +107,17 @@ public class FolderServiceImpl implements FolderService {
             folder = new Folder(project, parentFolder, name, currentUser);
         }
         
-        return folderRepository.save(folder);
+        // Save folder to database
+        folder = folderRepository.save(folder);
+        
+        // Create folder in storage system
+        try {
+            createFolderInStorage(folder);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create folder in storage system", e);
+        }
+        
+        return folder;
     }
 
     @Override
@@ -120,5 +137,22 @@ public class FolderServiceImpl implements FolderService {
         }
         
         folderRepository.delete(folder);
+    }
+    
+    /**
+     * Creates a folder in the storage system based on the database folder entity.
+     * The folder structure follows: uploads/{projectId}/{folderId}
+     *
+     * @param folder The folder entity
+     * @throws IOException If an I/O error occurs
+     */
+    private void createFolderInStorage(Folder folder) throws IOException {
+        // Ensure project directory exists
+        String projectPath = "projects/" + folder.getProject().getId();
+        storageService.createDirectory(projectPath);
+        
+        // Create folder directory
+        String folderPath = projectPath + "/" + folder.getId();
+        storageService.createDirectory(folderPath);
     }
 } 

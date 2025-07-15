@@ -39,12 +39,28 @@ public class FileSystemStorageService implements StorageService {
             throw new IllegalArgumentException("Cannot store file with relative path outside current directory");
         }
         
-        // Generate a unique filename to prevent overwriting existing files
-        String uniqueFilename = UUID.randomUUID() + "-" + cleanFilename;
-        Path destinationFile = this.rootLocation.resolve(uniqueFilename).normalize().toAbsolutePath();
+        // Check if the filename contains a path
+        Path destinationFile;
+        if (cleanFilename.contains("/")) {
+            // Extract the directory path and ensure it exists
+            String dirPath = cleanFilename.substring(0, cleanFilename.lastIndexOf("/"));
+            Path dirLocation = this.rootLocation.resolve(dirPath).normalize().toAbsolutePath();
+            
+            // Create directories if they don't exist
+            if (!Files.exists(dirLocation)) {
+                Files.createDirectories(dirLocation);
+            }
+            
+            // Resolve the full path for the file
+            destinationFile = this.rootLocation.resolve(cleanFilename).normalize().toAbsolutePath();
+        } else {
+            // Generate a unique filename to prevent overwriting existing files
+            String uniqueFilename = UUID.randomUUID() + "-" + cleanFilename;
+            destinationFile = this.rootLocation.resolve(uniqueFilename).normalize().toAbsolutePath();
+        }
         
         // Ensure the destination is within the storage location
-        if (!destinationFile.getParent().equals(this.rootLocation.toAbsolutePath())) {
+        if (!destinationFile.startsWith(this.rootLocation.toAbsolutePath())) {
             throw new IllegalArgumentException("Cannot store file outside current directory");
         }
         
@@ -82,5 +98,28 @@ public class FileSystemStorageService implements StorageService {
     @Override
     public Path getPath(String filename) {
         return rootLocation.resolve(filename).normalize().toAbsolutePath();
+    }
+    
+    @Override
+    public Path createDirectory(String relativePath) throws IOException {
+        String cleanPath = StringUtils.cleanPath(relativePath);
+        if (cleanPath.contains("..")) {
+            // Security check to prevent directory traversal attacks
+            throw new IllegalArgumentException("Cannot create directory with relative path outside current directory");
+        }
+        
+        Path directoryPath = this.rootLocation.resolve(cleanPath).normalize().toAbsolutePath();
+        
+        // Ensure the directory is within the storage location
+        if (!directoryPath.startsWith(this.rootLocation.toAbsolutePath())) {
+            throw new IllegalArgumentException("Cannot create directory outside storage location");
+        }
+        
+        // Create the directory if it doesn't exist
+        if (!Files.exists(directoryPath)) {
+            Files.createDirectories(directoryPath);
+        }
+        
+        return directoryPath;
     }
 } 

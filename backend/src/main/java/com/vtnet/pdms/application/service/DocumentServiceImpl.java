@@ -85,7 +85,7 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('ROLE_PROJECT_MANAGER') and @customPermissionEvaluator.hasProjectAccess(#uploadDTO.projectId)")
+    @PreAuthorize("@customPermissionEvaluator.hasProjectAccess(#uploadDTO.projectId)")
     public Document uploadDocument(DocumentUploadDTO uploadDTO) throws IOException {
         validateDocumentUpload(uploadDTO);
         
@@ -122,9 +122,23 @@ public class DocumentServiceImpl implements DocumentService {
         // Save the document to get an ID
         document = documentRepository.save(document);
         
-        // Store the file
-        Path storedFilePath = storageService.store(file, document.getId() + "_" + file.getOriginalFilename());
-        String storagePath = storedFilePath.getFileName().toString();
+        // Determine the storage path for the file
+        // Format: projects/{projectId}/{folderId}/{documentId}_{filename}
+        String projectId = folder.getProject().getId().toString();
+        String folderId = folder.getId().toString();
+        String documentId = document.getId().toString();
+        String filename = file.getOriginalFilename();
+        String relativePath = "projects/" + projectId + "/" + folderId;
+        
+        // Ensure the directory exists
+        storageService.createDirectory(relativePath);
+        
+        // Store the file in the correct location
+        String storageFilename = relativePath + "/" + documentId + "_" + filename;
+        Path storedFilePath = storageService.store(file, storageFilename);
+        
+        // Get the storage path to save in the database
+        String storagePath = storedFilePath.toString();
         
         // Add the first version
         document.addVersion(storagePath, file.getSize(), currentUser);
