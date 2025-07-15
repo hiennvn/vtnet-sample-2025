@@ -29,4 +29,24 @@ export const getSubfolders = async (folderId: number): Promise<FolderDTO[]> => {
 export const getFolderById = async (folderId: number): Promise<FolderDTO> => {
   const response = await axiosInstance.get<FolderDTO>(`/api/folders/${folderId}`);
   return response.data;
+};
+
+/**
+ * Create a new folder
+ * @param name The folder name
+ * @param projectId The project ID
+ * @param parentFolderId The parent folder ID (optional)
+ * @returns Promise with the created folder
+ */
+export const createFolder = async (
+  name: string,
+  projectId: number,
+  parentFolderId?: number
+): Promise<FolderDTO> => {
+  const response = await axiosInstance.post<FolderDTO>('/api/folders', {
+    name,
+    projectId,
+    parentFolderId
+  });
+  return response.data;
 }; 

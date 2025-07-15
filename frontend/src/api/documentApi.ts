@@ -43,3 +43,39 @@ export const searchDocuments = async (projectId: number, query: string): Promise
   });
   return response.data;
 }; 
+
+/**
+ * Upload a document
+ * @param name The document name
+ * @param projectId The project ID
+ * @param folderId The folder ID (optional)
+ * @param file The file to upload
+ * @returns Promise with the created document
+ */
+export const uploadDocument = async (
+  name: string,
+  projectId: number,
+  file: File,
+  folderId?: number
+): Promise<DocumentDTO> => {
+  const formData = new FormData();
+  formData.append('name', name);
+  formData.append('projectId', projectId.toString());
+  formData.append('file', file);
+  
+  if (folderId) {
+    formData.append('folderId', folderId.toString());
+  }
+  
+  const response = await axiosInstance.post<DocumentDTO>(
+    '/api/documents',
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    }
+  );
+  
+  return response.data;
+}; 

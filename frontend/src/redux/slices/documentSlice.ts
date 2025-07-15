@@ -7,7 +7,9 @@ interface DocumentState {
   documents: DocumentDTO[];
   currentDocument: DocumentDTO | null;
   loading: boolean;
+  uploading: boolean;
   error: string | null;
+  uploadSuccess: boolean;
 }
 
 // Initial state
@@ -15,7 +17,9 @@ const initialState: DocumentState = {
   documents: [],
   currentDocument: null,
   loading: false,
-  error: null
+  uploading: false,
+  error: null,
+  uploadSuccess: false
 };
 
 // Async thunks
@@ -63,6 +67,21 @@ export const searchDocuments = createAsyncThunk(
   }
 );
 
+export const uploadDocument = createAsyncThunk(
+  'documents/uploadDocument',
+  async (
+    { name, projectId, file, folderId }: 
+    { name: string; projectId: number; file: File; folderId?: number },
+    { rejectWithValue }
+  ) => {
+    try {
+      return await documentApi.uploadDocument(name, projectId, file, folderId);
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to upload document');
+    }
+  }
+);
+
 // Create the slice
 const documentSlice = createSlice({
   name: 'documents',
@@ -73,6 +92,11 @@ const documentSlice = createSlice({
     },
     clearCurrentDocument: (state) => {
       state.currentDocument = null;
+    },
+    resetUploadState: (state) => {
+      state.uploading = false;
+      state.uploadSuccess = false;
+      state.error = null;
     }
   },
   extraReducers: (builder) => {
@@ -131,9 +155,26 @@ const documentSlice = createSlice({
       state.loading = false;
       state.error = action.payload as string;
     });
+    
+    // uploadDocument
+    builder.addCase(uploadDocument.pending, (state) => {
+      state.uploading = true;
+      state.uploadSuccess = false;
+      state.error = null;
+    });
+    builder.addCase(uploadDocument.fulfilled, (state, action: PayloadAction<DocumentDTO>) => {
+      state.uploading = false;
+      state.uploadSuccess = true;
+      state.documents = [...state.documents, action.payload];
+    });
+    builder.addCase(uploadDocument.rejected, (state, action) => {
+      state.uploading = false;
+      state.uploadSuccess = false;
+      state.error = action.payload as string;
+    });
   }
 });
 
 // Export actions and reducer
-export const { clearDocuments, clearCurrentDocument } = documentSlice.actions;
+export const { clearDocuments, clearCurrentDocument, resetUploadState } = documentSlice.actions;
 export default documentSlice.reducer; 

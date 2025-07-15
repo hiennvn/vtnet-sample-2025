@@ -52,6 +52,20 @@ export const fetchFolderById = createAsyncThunk(
   }
 );
 
+export const createFolder = createAsyncThunk(
+  'folders/createFolder',
+  async (
+    { name, projectId, parentFolderId }: { name: string; projectId: number; parentFolderId?: number },
+    { rejectWithValue }
+  ) => {
+    try {
+      return await folderApi.createFolder(name, projectId, parentFolderId);
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to create folder');
+    }
+  }
+);
+
 // Create the slice
 const folderSlice = createSlice({
   name: 'folders',
@@ -103,6 +117,27 @@ const folderSlice = createSlice({
       state.currentFolder = action.payload;
     });
     builder.addCase(fetchFolderById.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    });
+
+    // createFolder
+    builder.addCase(createFolder.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(createFolder.fulfilled, (state, action: PayloadAction<FolderDTO>) => {
+      state.loading = false;
+      // Add the new folder to the folders list if it's a child of the current folder
+      if (state.currentFolder && state.currentFolder.id === action.payload.parentFolderId) {
+        state.folders = [...state.folders, action.payload];
+      }
+      // If we're at the root level and the new folder is also at root level
+      else if (!state.currentFolder && !action.payload.parentFolderId) {
+        state.folders = [...state.folders, action.payload];
+      }
+    });
+    builder.addCase(createFolder.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload as string;
     });

@@ -1,6 +1,7 @@
 package com.vtnet.pdms.interfaces.api;
 
 import com.vtnet.pdms.application.dto.DocumentDTO;
+import com.vtnet.pdms.application.dto.DocumentUploadDTO;
 import com.vtnet.pdms.application.mapper.DocumentMapper;
 import com.vtnet.pdms.domain.model.Document;
 import com.vtnet.pdms.domain.service.DocumentService;
@@ -10,10 +11,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -119,5 +125,43 @@ public class DocumentController {
         Document document = documentService.getDocumentById(id);
         DocumentDTO documentDTO = documentMapper.toDto(document);
         return ResponseEntity.ok(documentDTO);
+    }
+    
+    /**
+     * POST /api/documents : Upload a new document.
+     *
+     * @param name The document name
+     * @param projectId The project ID
+     * @param folderId The folder ID (optional)
+     * @param file The file to upload
+     * @return The created document
+     * @throws IOException If an I/O error occurs
+     */
+    @PostMapping(value = "/documents", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(
+        summary = "Upload a new document",
+        description = "Upload a new document to a project folder. Requires PROJECT_MANAGER role.",
+        responses = {
+            @ApiResponse(
+                responseCode = "201",
+                description = "Document created",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = DocumentDTO.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "Invalid input"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - requires PROJECT_MANAGER role"),
+            @ApiResponse(responseCode = "404", description = "Project or folder not found")
+        }
+    )
+    public ResponseEntity<DocumentDTO> uploadDocument(
+            @RequestParam("name") String name,
+            @RequestParam("projectId") Long projectId,
+            @RequestParam(value = "folderId", required = false) Long folderId,
+            @RequestParam("file") MultipartFile file) throws IOException {
+        
+        DocumentUploadDTO uploadDTO = new DocumentUploadDTO(name, projectId, folderId, file);
+        Document document = documentService.uploadDocument(uploadDTO);
+        DocumentDTO documentDTO = documentMapper.toDto(document);
+        return ResponseEntity.status(HttpStatus.CREATED).body(documentDTO);
     }
 } 

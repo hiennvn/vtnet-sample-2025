@@ -1,6 +1,7 @@
 package com.vtnet.pdms.interfaces.api;
 
 import com.vtnet.pdms.application.dto.FolderDTO;
+import com.vtnet.pdms.application.dto.FolderCreateDTO;
 import com.vtnet.pdms.application.mapper.FolderMapper;
 import com.vtnet.pdms.domain.model.Folder;
 import com.vtnet.pdms.domain.service.FolderService;
@@ -10,7 +11,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -119,5 +122,37 @@ public class FolderController {
         Folder folder = folderService.getFolderById(id);
         FolderDTO folderDTO = folderMapper.toDto(folder);
         return ResponseEntity.ok(folderDTO);
+    }
+
+    /**
+     * POST /api/folders : Create a new folder.
+     *
+     * @param folderCreateDTO The folder creation data
+     * @return The created folder
+     */
+    @PostMapping("/folders")
+    @Operation(
+        summary = "Create a new folder",
+        description = "Create a new folder in a project or as a subfolder",
+        responses = {
+            @ApiResponse(
+                responseCode = "201",
+                description = "Folder created successfully",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = FolderDTO.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "Invalid input"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - requires Project Manager role"),
+            @ApiResponse(responseCode = "404", description = "Project or parent folder not found")
+        }
+    )
+    public ResponseEntity<FolderDTO> createFolder(@Valid @RequestBody FolderCreateDTO folderCreateDTO) {
+        Folder folder = folderService.createFolder(
+            folderCreateDTO.getProjectId(),
+            folderCreateDTO.getParentFolderId(),
+            folderCreateDTO.getName()
+        );
+        FolderDTO folderDTO = folderMapper.toDto(folder);
+        return ResponseEntity.status(HttpStatus.CREATED).body(folderDTO);
     }
 } 

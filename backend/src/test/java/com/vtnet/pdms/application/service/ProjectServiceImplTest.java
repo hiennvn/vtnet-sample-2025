@@ -2,10 +2,13 @@ package com.vtnet.pdms.application.service;
 
 import com.vtnet.pdms.application.dto.ProjectListDTO;
 import com.vtnet.pdms.application.mapper.ProjectMapper;
+import com.vtnet.pdms.domain.model.Document;
 import com.vtnet.pdms.domain.model.Project;
 import com.vtnet.pdms.domain.model.User;
-import com.vtnet.pdms.domain.repository.ProjectRepository;
+import com.vtnet.pdms.domain.repository.DocumentRepository;
 import com.vtnet.pdms.domain.repository.ProjectMemberRepository;
+import com.vtnet.pdms.domain.repository.ProjectRepository;
+import com.vtnet.pdms.domain.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +23,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithMockUser;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +48,12 @@ class ProjectServiceImplTest {
     
     @Mock
     private ProjectMemberRepository projectMemberRepository;
+    
+    @Mock
+    private DocumentRepository documentRepository;
+    
+    @Mock
+    private UserRepository userRepository;
 
     @Mock
     private ProjectMapper projectMapper;
@@ -151,13 +161,35 @@ class ProjectServiceImplTest {
         // Given
         List<Long> projectIds = List.of(1L, 2L, 3L);
         
-        // When using the real method, not the spy
+        // Mock document repository responses
+        List<Document> project1Docs = new ArrayList<>();
+        project1Docs.add(new Document());
+        project1Docs.add(new Document());
+        
+        List<Document> project2Docs = new ArrayList<>();
+        project2Docs.add(new Document());
+        
+        List<Document> project3Docs = new ArrayList<>();
+        // Empty list for project 3
+        
+        when(documentRepository.findByProjectId(1L)).thenReturn(project1Docs);
+        when(documentRepository.findByProjectId(2L)).thenReturn(project2Docs);
+        when(documentRepository.findByProjectId(3L)).thenReturn(project3Docs);
+        
+        // When
         Map<Long, Integer> result = projectService.getDocumentCountsByProjectIds(projectIds);
         
         // Then
         assertThat(result).isNotNull();
         assertThat(result).hasSize(3);
-        assertThat(result).containsKeys(1L, 2L, 3L);
+        assertThat(result).containsEntry(1L, 2);
+        assertThat(result).containsEntry(2L, 1);
+        assertThat(result).containsEntry(3L, 0);
+        
+        // Verify document repository was called for each project ID
+        verify(documentRepository, times(1)).findByProjectId(1L);
+        verify(documentRepository, times(1)).findByProjectId(2L);
+        verify(documentRepository, times(1)).findByProjectId(3L);
     }
     
     @Test

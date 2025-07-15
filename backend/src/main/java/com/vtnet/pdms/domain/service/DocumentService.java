@@ -1,7 +1,10 @@
 package com.vtnet.pdms.domain.service;
 
+import com.vtnet.pdms.application.dto.DocumentUploadDTO;
 import com.vtnet.pdms.domain.model.Document;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -10,16 +13,7 @@ import java.util.List;
 public interface DocumentService {
 
     /**
-     * Get a document by ID.
-     *
-     * @param id The document ID
-     * @return The document
-     * @throws com.vtnet.pdms.domain.exception.ResourceNotFoundException if the document is not found
-     */
-    Document getDocumentById(Long id);
-
-    /**
-     * Get all documents for a project.
+     * Get documents for a project.
      *
      * @param projectId The project ID
      * @return List of documents
@@ -35,26 +29,27 @@ public interface DocumentService {
     List<Document> getFolderDocuments(Long folderId);
 
     /**
-     * Search documents by name within a project.
+     * Get a document by ID.
      *
-     * @param projectId The project ID
-     * @param query The search query
-     * @return List of matching documents
+     * @param id The document ID
+     * @return The document
      */
-    List<Document> searchDocumentsByName(Long projectId, String query);
+    Document getDocumentById(Long id);
 
     /**
-     * Update document display order within a folder.
+     * Upload a new document.
      *
-     * @param folderId The folder ID
-     * @param documentIds Ordered list of document IDs
+     * @param uploadDTO The document upload data
+     * @return The created document
+     * @throws IOException If an I/O error occurs
      */
-    void updateDocumentOrder(Long folderId, List<Long> documentIds);
+    Document uploadDocument(DocumentUploadDTO uploadDTO) throws IOException;
 
     /**
-     * Delete a document.
+     * Validate document upload data.
      *
-     * @param documentId The document ID
+     * @param uploadDTO The document upload data
+     * @throws IllegalArgumentException If the data is invalid
      */
-    void deleteDocument(Long documentId);
+    void validateDocumentUpload(DocumentUploadDTO uploadDTO);
 } 

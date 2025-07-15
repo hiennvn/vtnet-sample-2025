@@ -6,8 +6,9 @@ import com.vtnet.pdms.application.dto.ProjectUpdateDTO;
 import com.vtnet.pdms.application.mapper.ProjectMapper;
 import com.vtnet.pdms.domain.model.Project;
 import com.vtnet.pdms.domain.model.User;
-import com.vtnet.pdms.domain.repository.ProjectRepository;
+import com.vtnet.pdms.domain.repository.DocumentRepository;
 import com.vtnet.pdms.domain.repository.ProjectMemberRepository;
+import com.vtnet.pdms.domain.repository.ProjectRepository;
 import com.vtnet.pdms.domain.repository.UserRepository;
 import com.vtnet.pdms.domain.service.ProjectService;
 import com.vtnet.pdms.infrastructure.security.SecurityUtils;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -40,6 +43,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectMapper projectMapper;
     private final UserRepository userRepository;
     private final ProjectMemberRepository projectMemberRepository;
+    private final DocumentRepository documentRepository;
 
     /**
      * Constructor with dependency injection.
@@ -48,16 +52,19 @@ public class ProjectServiceImpl implements ProjectService {
      * @param projectMapper     Mapper for project entity-DTO conversion
      * @param userRepository    Repository for user operations
      * @param projectMemberRepository Repository for project member operations
+     * @param documentRepository Repository for document operations
      */
     @Autowired
     public ProjectServiceImpl(ProjectRepository projectRepository, 
                              ProjectMapper projectMapper, 
                              UserRepository userRepository,
-                             ProjectMemberRepository projectMemberRepository) {
+                             ProjectMemberRepository projectMemberRepository,
+                             DocumentRepository documentRepository) {
         this.projectRepository = projectRepository;
         this.projectMapper = projectMapper;
         this.userRepository = userRepository;
         this.projectMemberRepository = projectMemberRepository;
+        this.documentRepository = documentRepository;
     }
 
     /**
@@ -123,16 +130,13 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional(readOnly = true)
     public Map<Long, Integer> getDocumentCountsByProjectIds(List<Long> projectIds) {
-        // In a real implementation, this would query the documents table to get counts
-        // For now, we'll return mock data since we're using TDD and focusing on structure
-        
         logger.info("Calculating document counts for {} projects", projectIds.size());
         
-        // Mock implementation - in real code, this would query the database
         Map<Long, Integer> documentCounts = new HashMap<>();
         for (Long projectId : projectIds) {
-            // Simulate random document counts between 0 and 20
-            documentCounts.put(projectId, (int) (Math.random() * 20));
+            // Get actual document count from repository
+            List<com.vtnet.pdms.domain.model.Document> documents = documentRepository.findByProjectId(projectId);
+            documentCounts.put(projectId, documents.size());
         }
         
         return documentCounts;

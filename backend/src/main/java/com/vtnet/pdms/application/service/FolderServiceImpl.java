@@ -74,7 +74,7 @@ public class FolderServiceImpl implements FolderService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('ROLE_ADMIN') and @customPermissionEvaluator.hasProjectAccess(#projectId)")
+    @PreAuthorize("@customPermissionEvaluator.hasProjectAccess(#projectId)")
     public Folder createFolder(Long projectId, Long parentFolderId, String name) {
         Project project = projectService.getProjectById(projectId);
         User currentUser = securityUtils.getCurrentUser();
@@ -105,7 +105,7 @@ public class FolderServiceImpl implements FolderService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('ROLE_ADMIN') and @customPermissionEvaluator.hasFolderAccess(#folderId)")
+    @PreAuthorize("@customPermissionEvaluator.hasFolderAccess(#folderId)")
     public void deleteFolder(Long folderId) {
         Folder folder = getFolderById(folderId);
         

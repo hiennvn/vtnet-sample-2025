@@ -1,31 +1,88 @@
 .project-documents-page {
-  padding: 24px;
-  height: calc(100vh - 64px); /* Adjust based on your header height */
+  padding: 20px;
+  height: calc(100vh - 80px);
   display: flex;
   flex-direction: column;
 }
 
 .project-documents-title {
-  margin-bottom: 16px;
-  font-size: 24px;
+  margin-bottom: 20px;
 }
 
 .project-documents-container {
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 24px;
+  display: flex;
   flex: 1;
+  gap: 20px;
   overflow: hidden;
 }
 
 .project-documents-sidebar {
-  height: 100%;
+  width: 250px;
   overflow: hidden;
 }
 
 .project-documents-content {
-  height: 100%;
+  flex: 1;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.document-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.document-actions-left h3 {
+  margin: 0;
+}
+
+.document-actions-right {
+  display: flex;
+  gap: 10px;
+}
+
+.upload-toggle-button, .create-folder-button {
+  padding: 8px 16px;
+  background-color: #0078d4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.upload-toggle-button:hover, .create-folder-button:hover {
+  background-color: #106ebe;
+}
+
+.create-folder-button {
+  background-color: #107c10;
+}
+
+.create-folder-button:hover {
+  background-color: #0b6a0b;
+}
+
+.no-documents {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+  color: #666;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  flex: 1;
+}
+
+.empty-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
 }
 
 .project-documents-loading {
@@ -33,6 +90,5 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  font-size: 18px;
   color: #666;
 } 
