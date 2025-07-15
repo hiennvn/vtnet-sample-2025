@@ -7,6 +7,8 @@ import roleReducer from '../slices/roleSlice';
 import authReducer from '../slices/authSlice';
 import projectReducer from '../slices/projectSlice';
 import projectMemberReducer from '../slices/projectMemberSlice';
+import documentReducer from '../slices/documentSlice';
+import folderReducer from '../slices/folderSlice';
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +17,8 @@ export const store = configureStore({
     roles: roleReducer,
     projects: projectReducer,
     projectMembers: projectMemberReducer,
+    documents: documentReducer,
+    folders: folderReducer,
   },
   middleware: (getDefaultMiddleware) => 
     getDefaultMiddleware({

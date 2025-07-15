@@ -1,0 +1,38 @@
+.project-documents-page {
+  padding: 24px;
+  height: calc(100vh - 64px); /* Adjust based on your header height */
+  display: flex;
+  flex-direction: column;
+}
+
+.project-documents-title {
+  margin-bottom: 16px;
+  font-size: 24px;
+}
+
+.project-documents-container {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 24px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.project-documents-sidebar {
+  height: 100%;
+  overflow: hidden;
+}
+
+.project-documents-content {
+  height: 100%;
+  overflow: hidden;
+}
+
+.project-documents-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 18px;
+  color: #666;
+} 

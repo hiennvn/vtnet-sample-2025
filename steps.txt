@@ -96,6 +96,10 @@ Use @4.checklist_us.2.1.2.md as the example, create the checklist to implement t
 
 6. AI Agent / Sonet-3.7: Implement use story "US1.4: Manage Project Membership". Remember to use existing databse schema and codebase
 
+7. AI Agent / Sonet-3.7: @technical-tutorials.mdc 
+Use @4.checklist_us_2.1.3.md as the example, write the checklist to implement @2.2.userstories_document_handling.md to 4.checklist_us_2.2.md file. Remember to:
 
+1. use existing codebase 
+2. use existing database schema
 
 --- TESTING ---

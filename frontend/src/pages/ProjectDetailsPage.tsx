@@ -42,6 +42,12 @@ const ProjectDetailsPage: React.FC = () => {
     }
   };
   
+  const handleViewDocuments = () => {
+    if (id) {
+      navigate(`/projects/${id}/documents`);
+    }
+  };
+  
   const handleDeleteClick = () => {
     setIsDeleteDialogOpen(true);
   };
@@ -152,15 +158,18 @@ const ProjectDetailsPage: React.FC = () => {
             <Button 
               variant="contained" 
               startIcon={<FolderIcon />}
+              onClick={handleViewDocuments}
             >
-              Upload Document
+              Browse Documents
             </Button>
           }
         />
         <Divider />
         <CardContent>
           <Typography variant="body1" sx={{ py: 4, textAlign: 'center' }}>
-            No documents available in this project yet.
+            {project.documentCount ? 
+              `This project has ${project.documentCount} documents. Click "Browse Documents" to view them.` : 
+              'No documents available in this project yet.'}
           </Typography>
         </CardContent>
       </Card>

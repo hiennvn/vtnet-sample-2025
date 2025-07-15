@@ -1,5 +1,8 @@
 package com.vtnet.pdms.infrastructure.security;
 
+import com.vtnet.pdms.domain.model.User;
+import com.vtnet.pdms.domain.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,6 +15,13 @@ import java.util.Optional;
  */
 @Component("securityUtils")
 public class SecurityUtils {
+
+    private final UserRepository userRepository;
+
+    @Autowired
+    public SecurityUtils(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     /**
      * Gets the ID of the currently authenticated user.
@@ -51,6 +61,28 @@ public class SecurityUtils {
         }
 
         return Optional.empty();
+    }
+
+    /**
+     * Gets the currently authenticated user.
+     *
+     * @return The user or null if not authenticated
+     */
+    public User getCurrentUser() {
+        Long userId = getCurrentUserId();
+        if (userId == null) {
+            return null;
+        }
+        return userRepository.findById(userId).orElse(null);
+    }
+
+    /**
+     * Gets the current authentication from the security context.
+     *
+     * @return The authentication or null if not available
+     */
+    public Authentication getAuthentication() {
+        return SecurityContextHolder.getContext().getAuthentication();
     }
 
     /**

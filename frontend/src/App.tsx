@@ -20,6 +20,7 @@ import CreateProjectPage from './pages/CreateProjectPage';
 import ProjectDetailsPage from './pages/ProjectDetailsPage';
 import EditProjectPage from './pages/EditProjectPage';
 import ProjectMembersPage from './pages/ProjectMembersPage';
+import ProjectDocumentsPage from './pages/ProjectDocumentsPage';
 
 const theme = createTheme();
 
@@ -107,6 +108,14 @@ function AppRoutes() {
         <Route path="/projects/:projectId/members" element={
           <ProtectedRoute>
             <ProjectMembersPage />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/projects/:projectId/documents" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <ProjectDocumentsPage />
+            </MainLayout>
           </ProtectedRoute>
         } />
         
