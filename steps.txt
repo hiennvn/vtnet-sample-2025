@@ -94,4 +94,8 @@ Use @4.checklist_us.2.1.2.md as the example, create the checklist to implement t
 
 5. AI Agent / Sonet-3.7: @4.checklist_us_2.1.3.md implement "US1.1: Create a New Project" (line 5). Remember to update the checklist
 
+6. AI Agent / Sonet-3.7: Implement use story "US1.4: Manage Project Membership". Remember to use existing databse schema and codebase
+
+
+
 --- TESTING ---

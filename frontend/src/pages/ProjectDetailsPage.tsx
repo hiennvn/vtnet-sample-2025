@@ -28,8 +28,9 @@ const ProjectDetailsPage: React.FC = () => {
   };
 
   const handleManageMembers = () => {
-    // Future implementation
-    console.log('Manage members');
+    if (id) {
+      navigate(`/projects/${id}/members`);
+    }
   };
 
   if (loading) {
