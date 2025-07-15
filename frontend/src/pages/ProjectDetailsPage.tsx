@@ -1,11 +1,19 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../redux/store';
-import { fetchProjectById, selectSelectedProject, selectProjectLoading, selectProjectError } from '../redux/slices/projectSlice';
+import { 
+  fetchProjectById, 
+  selectSelectedProject, 
+  selectProjectLoading, 
+  selectProjectError,
+  deleteProject
+} from '../redux/slices/projectSlice';
 import { Card, CardHeader, CardContent, Typography, Button, Skeleton, Alert, Stack, Divider } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, People as PeopleIcon, Folder as FolderIcon } from '@mui/icons-material';
 import { format } from 'date-fns';
 import './ProjectDetailsPage.css';
+import DeleteProjectConfirmation from '../components/projects/DeleteProjectConfirmation';
+import toastService from '../services/toastService';
 
 const ProjectDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -14,6 +22,7 @@ const ProjectDetailsPage: React.FC = () => {
   const project = useAppSelector(selectSelectedProject);
   const loading = useAppSelector(selectProjectLoading);
   const error = useAppSelector(selectProjectError);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -30,6 +39,28 @@ const ProjectDetailsPage: React.FC = () => {
   const handleManageMembers = () => {
     if (id) {
       navigate(`/projects/${id}/members`);
+    }
+  };
+  
+  const handleDeleteClick = () => {
+    setIsDeleteDialogOpen(true);
+  };
+  
+  const handleDeleteCancel = () => {
+    setIsDeleteDialogOpen(false);
+  };
+  
+  const handleDeleteConfirm = async () => {
+    if (id && project) {
+      try {
+        await dispatch(deleteProject(Number(id))).unwrap();
+        toastService.showSuccess('Project deleted successfully');
+        navigate('/projects');
+      } catch (error) {
+        toastService.showError('Failed to delete project');
+      } finally {
+        setIsDeleteDialogOpen(false);
+      }
     }
   };
 
@@ -87,6 +118,7 @@ const ProjectDetailsPage: React.FC = () => {
                 variant="outlined" 
                 color="error" 
                 startIcon={<DeleteIcon />}
+                onClick={handleDeleteClick}
               >
                 Delete
               </Button>
@@ -132,6 +164,13 @@ const ProjectDetailsPage: React.FC = () => {
           </Typography>
         </CardContent>
       </Card>
+      
+      <DeleteProjectConfirmation
+        projectName={project.name}
+        isOpen={isDeleteDialogOpen}
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+      />
     </div>
   );
 };

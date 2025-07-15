@@ -67,6 +67,18 @@ export const getProjectById = async (id: number): Promise<Project> => {
 };
 
 /**
+ * Delete a project
+ */
+export const deleteProject = async (id: number): Promise<void> => {
+  try {
+    await api.delete(`/projects/${id}`);
+  } catch (error) {
+    console.error("Error deleting project:", error);
+    throw new Error(`Failed to delete project with ID ${id}`);
+  }
+};
+
+/**
  * Handle API errors
  */
 const handleApiError = (error: any): Error => {
@@ -110,7 +122,8 @@ const projectApi = {
   getProjects,
   getProjectById,
   createProject,
-  updateProject
+  updateProject,
+  deleteProject
 };
 
 export default projectApi; 

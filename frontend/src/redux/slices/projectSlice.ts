@@ -84,6 +84,18 @@ export const fetchProjectById = createAsyncThunk(
   }
 );
 
+export const deleteProject = createAsyncThunk(
+  'projects/deleteProject',
+  async (id: number, { rejectWithValue }) => {
+    try {
+      await projectApi.deleteProject(id);
+      return id; // Return the id so we can remove it from the state
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
+    }
+  }
+);
+
 // Create the slice
 const projectSlice = createSlice({
   name: 'projects',
@@ -182,6 +194,29 @@ const projectSlice = createSlice({
       .addCase(fetchProjectById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string || 'Failed to fetch project';
+      })
+      
+      // Delete project
+      .addCase(deleteProject.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteProject.fulfilled, (state, action) => {
+        state.loading = false;
+        // Remove the deleted project from the list
+        state.projects = state.projects.filter(project => project.id !== action.payload);
+        // Clear the selected project if it was the one that was deleted
+        if (state.selectedProject && state.selectedProject.id === action.payload) {
+          state.selectedProject = null;
+        }
+        // Update pagination
+        if (state.pagination.totalElements > 0) {
+          state.pagination.totalElements -= 1;
+        }
+      })
+      .addCase(deleteProject.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string || 'Failed to delete project';
       });
   }
 });

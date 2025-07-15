@@ -182,4 +182,27 @@ public class ProjectController {
         ProjectListDTO projectDTO = projectMapper.toListDto(project);
         return ResponseEntity.ok(projectDTO);
     }
+    
+    /**
+     * DELETE /projects/{id} : Delete a project by ID.
+     *
+     * @param id The ID of the project to delete
+     * @return No content
+     */
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_DIRECTOR', 'ROLE_ADMIN')")
+    @Operation(
+        summary = "Delete a project",
+        description = "Delete a project by its ID. This will also delete all related data such as project members and documents.",
+        responses = {
+            @ApiResponse(responseCode = "204", description = "Project deleted successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden"),
+            @ApiResponse(responseCode = "404", description = "Project not found")
+        }
+    )
+    public ResponseEntity<Void> deleteProject(@PathVariable Long id) {
+        projectService.deleteProject(id);
+        return ResponseEntity.noContent().build();
+    }
 } 

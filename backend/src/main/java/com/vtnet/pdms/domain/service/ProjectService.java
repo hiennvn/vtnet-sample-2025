@@ -73,4 +73,12 @@ public interface ProjectService {
      * @return The updated project
      */
     Project updateProject(Long id, ProjectUpdateDTO projectUpdateDTO);
+    
+    /**
+     * Delete a project by ID.
+     * This will also delete all related data such as project members and documents.
+     *
+     * @param id The ID of the project to delete
+     */
+    void deleteProject(Long id);
 } 

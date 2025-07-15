@@ -7,6 +7,7 @@ import com.vtnet.pdms.application.mapper.ProjectMapper;
 import com.vtnet.pdms.domain.model.Project;
 import com.vtnet.pdms.domain.model.User;
 import com.vtnet.pdms.domain.repository.ProjectRepository;
+import com.vtnet.pdms.domain.repository.ProjectMemberRepository;
 import com.vtnet.pdms.domain.repository.UserRepository;
 import com.vtnet.pdms.domain.service.ProjectService;
 import com.vtnet.pdms.infrastructure.security.SecurityUtils;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +39,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
     private final UserRepository userRepository;
+    private final ProjectMemberRepository projectMemberRepository;
 
     /**
      * Constructor with dependency injection.
@@ -44,12 +47,17 @@ public class ProjectServiceImpl implements ProjectService {
      * @param projectRepository Repository for project operations
      * @param projectMapper     Mapper for project entity-DTO conversion
      * @param userRepository    Repository for user operations
+     * @param projectMemberRepository Repository for project member operations
      */
     @Autowired
-    public ProjectServiceImpl(ProjectRepository projectRepository, ProjectMapper projectMapper, UserRepository userRepository) {
+    public ProjectServiceImpl(ProjectRepository projectRepository, 
+                             ProjectMapper projectMapper, 
+                             UserRepository userRepository,
+                             ProjectMemberRepository projectMemberRepository) {
         this.projectRepository = projectRepository;
         this.projectMapper = projectMapper;
         this.userRepository = userRepository;
+        this.projectMemberRepository = projectMemberRepository;
     }
 
     /**
@@ -207,5 +215,31 @@ public class ProjectServiceImpl implements ProjectService {
         logger.info("Retrieving project with ID: {}", id);
         return projectRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Project not found with ID: " + id));
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void deleteProject(Long id) {
+        logger.info("Deleting project with ID: {}", id);
+        
+        // Check if the user has Director role
+        if (!SecurityUtils.hasAuthority("ROLE_DIRECTOR") && !SecurityUtils.hasAuthority("ROLE_ADMIN")) {
+            throw new AccessDeniedException("Only directors can delete projects");
+        }
+        
+        // Find the project
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Project not found with ID: " + id));
+        
+        // Delete project members first to avoid foreign key constraints
+        projectMemberRepository.deleteByProjectId(id);
+        
+        // Delete the project
+        projectRepository.delete(project);
+        
+        logger.info("Project with ID: {} has been deleted", id);
     }
 } 

@@ -4,6 +4,7 @@ import com.vtnet.pdms.domain.model.ProjectMember;
 import com.vtnet.pdms.domain.model.ProjectMember.ProjectMemberPK;
 import com.vtnet.pdms.domain.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -70,6 +71,7 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Pr
      *
      * @param projectId The project ID
      */
+    @Modifying
     @Query("DELETE FROM ProjectMember pm WHERE pm.id.project.id = :projectId")
     void deleteByProjectId(@Param("projectId") Long projectId);
 } 

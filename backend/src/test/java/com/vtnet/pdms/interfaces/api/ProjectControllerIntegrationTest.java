@@ -25,9 +25,14 @@ import java.util.List;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -129,5 +134,40 @@ class ProjectControllerIntegrationTest {
         mockMvc.perform(get("/projects")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
+    }
+    
+    @Test
+    @WithMockUser(authorities = {"ROLE_DIRECTOR"})
+    void deleteProject_asDirector_shouldDeleteProject() throws Exception {
+        // Setup
+        Long projectId = 1L;
+        doNothing().when(projectService).deleteProject(projectId);
+        
+        // Execute and verify
+        mockMvc.perform(delete("/projects/{id}", projectId)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+        
+        verify(projectService, times(1)).deleteProject(projectId);
+    }
+    
+    @Test
+    @WithMockUser(authorities = {"ROLE_PROJECT_MANAGER"})
+    void deleteProject_asProjectManager_shouldReturnForbidden() throws Exception {
+        // Execute and verify
+        mockMvc.perform(delete("/projects/{id}", 1L)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+        
+        verify(projectService, times(0)).deleteProject(anyLong());
+    }
+    
+    @Test
+    void deleteProject_withoutAuthentication_shouldReturnForbidden() throws Exception {
+        mockMvc.perform(delete("/projects/{id}", 1L)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+        
+        verify(projectService, times(0)).deleteProject(anyLong());
     }
 } 
