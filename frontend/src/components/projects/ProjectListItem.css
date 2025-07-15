@@ -1,0 +1,63 @@
+.project-item {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #e0e0e0;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.project-item:hover {
+  background-color: #f5f5f5;
+}
+
+.project-name {
+  flex: 2;
+  font-weight: 500;
+}
+
+.project-status {
+  flex: 1;
+  text-align: center;
+}
+
+.project-documents {
+  flex: 1;
+  text-align: center;
+}
+
+.project-date {
+  flex: 1;
+  text-align: right;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-badge.active {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.status-badge.completed {
+  background-color: #e3f2fd;
+  color: #1565c0;
+}
+
+.status-badge.archived {
+  background-color: #eeeeee;
+  color: #616161;
+}
+
+.status-badge.draft {
+  background-color: #fff8e1;
+  color: #f57f17;
+} 

@@ -1,6 +1,8 @@
 package com.vtnet.pdms.application.mapper;
 
+import com.vtnet.pdms.application.dto.ProjectCreateDTO;
 import com.vtnet.pdms.application.dto.ProjectListDTO;
+import com.vtnet.pdms.application.dto.ProjectUpdateDTO;
 import com.vtnet.pdms.domain.model.Project;
 import org.springframework.data.domain.Page;
 
@@ -62,4 +64,21 @@ public interface ProjectMapper {
      * @return The page of project DTOs with document counts
      */
     Page<ProjectListDTO> toListDtoPage(Page<Project> projectPage, Map<Long, Integer> documentCounts);
+    
+    /**
+     * Maps a ProjectCreateDTO to a Project entity.
+     *
+     * @param projectCreateDTO The project creation DTO
+     * @return The project entity
+     */
+    Project toEntity(ProjectCreateDTO projectCreateDTO);
+    
+    /**
+     * Updates a Project entity with data from a ProjectUpdateDTO.
+     *
+     * @param project The project entity to update
+     * @param projectUpdateDTO The project update DTO with new data
+     * @return The updated project entity
+     */
+    Project updateEntityFromDto(Project project, ProjectUpdateDTO projectUpdateDTO);
 } 

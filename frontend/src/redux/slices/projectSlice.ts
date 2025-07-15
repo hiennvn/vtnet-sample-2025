@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { Project, ProjectFetchParams } from '../../types/project';
+import { Project, ProjectFetchParams, ProjectCreatePayload, ProjectUpdatePayload } from '../../types/project';
 import * as projectApi from '../../api/projectApi';
 import { RootState } from '../store';
 
@@ -45,6 +45,28 @@ export const fetchProjects = createAsyncThunk(
   async (params: ProjectFetchParams, { rejectWithValue }) => {
     try {
       return await projectApi.getProjects(params);
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
+    }
+  }
+);
+
+export const createProject = createAsyncThunk(
+  'projects/createProject',
+  async (projectData: ProjectCreatePayload, { rejectWithValue }) => {
+    try {
+      return await projectApi.createProject(projectData);
+    } catch (error) {
+      return rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
+    }
+  }
+);
+
+export const updateProject = createAsyncThunk(
+  'projects/updateProject',
+  async ({ id, projectData }: { id: number; projectData: ProjectUpdatePayload }, { rejectWithValue }) => {
+    try {
+      return await projectApi.updateProject(id, projectData);
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'An unknown error occurred');
     }
@@ -110,6 +132,42 @@ const projectSlice = createSlice({
       .addCase(fetchProjects.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string || 'Failed to fetch projects';
+      })
+      
+      // Create project
+      .addCase(createProject.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createProject.fulfilled, (state, action) => {
+        state.loading = false;
+        // Add the new project to the beginning of the list
+        state.projects = [action.payload, ...state.projects];
+      })
+      .addCase(createProject.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string || 'Failed to create project';
+      })
+      
+      // Update project
+      .addCase(updateProject.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProject.fulfilled, (state, action) => {
+        state.loading = false;
+        // Update the project in the list
+        state.projects = state.projects.map(project => 
+          project.id === action.payload.id ? action.payload : project
+        );
+        // Update the selected project if it's the one that was updated
+        if (state.selectedProject && state.selectedProject.id === action.payload.id) {
+          state.selectedProject = action.payload;
+        }
+      })
+      .addCase(updateProject.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string || 'Failed to update project';
       })
       
       // Fetch project by ID

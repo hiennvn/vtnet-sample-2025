@@ -5,6 +5,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 /**
  * Utility class for Spring Security operations.
  */
@@ -31,6 +33,27 @@ public class SecurityUtils {
     }
 
     /**
+     * Gets the login (username/email) of the currently authenticated user.
+     *
+     * @return Optional containing the user login, or empty if not authenticated
+     */
+    public static Optional<String> getCurrentUserLogin() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return Optional.empty();
+        }
+
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof UserPrincipal) {
+            return Optional.ofNullable(((UserPrincipal) principal).getEmail());
+        } else if (principal instanceof String) {
+            return Optional.of((String) principal);
+        }
+
+        return Optional.empty();
+    }
+
+    /**
      * Checks if the current user has the specified role.
      *
      * @param role The role to check
@@ -45,6 +68,23 @@ public class SecurityUtils {
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(authority -> authority.equals(role));
+    }
+
+    /**
+     * Checks if the current user has the specified authority.
+     *
+     * @param authority The authority to check
+     * @return true if the user has the authority, false otherwise
+     */
+    public static boolean hasAuthority(String authority) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(auth -> auth.equals(authority));
     }
 
     /**

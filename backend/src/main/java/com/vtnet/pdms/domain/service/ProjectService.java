@@ -1,6 +1,9 @@
 package com.vtnet.pdms.domain.service;
 
+import com.vtnet.pdms.application.dto.ProjectCreateDTO;
 import com.vtnet.pdms.application.dto.ProjectListDTO;
+import com.vtnet.pdms.application.dto.ProjectUpdateDTO;
+import com.vtnet.pdms.domain.model.Project;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -45,4 +48,29 @@ public interface ProjectService {
      * @return Map of project IDs to document counts
      */
     Map<Long, Integer> getDocumentCountsByProjectIds(List<Long> projectIds);
+    
+    /**
+     * Get a project by ID.
+     *
+     * @param id The ID of the project to retrieve
+     * @return The project with the specified ID
+     */
+    Project getProjectById(Long id);
+    
+    /**
+     * Create a new project.
+     *
+     * @param projectCreateDTO The project data
+     * @return The created project
+     */
+    Project createProject(ProjectCreateDTO projectCreateDTO);
+    
+    /**
+     * Update an existing project.
+     *
+     * @param id The ID of the project to update
+     * @param projectUpdateDTO The updated project data
+     * @return The updated project
+     */
+    Project updateProject(Long id, ProjectUpdateDTO projectUpdateDTO);
 } 

@@ -14,6 +14,7 @@ import ProjectFilter from '../components/projects/ProjectFilter'
 import UserSearch from '../components/users/UserSearch'
 import toastService from '../services/toastService'
 import '../components/users/UserManagement.css'
+import './ProjectsPage.css'
 
 // Define possible role formats
 interface RoleObject {
@@ -164,7 +165,13 @@ function ProjectsPage() {
     return (
       <div className="content-area">
         <div className="card">
-          <div className="card-content loading-state">Loading...</div>
+          <div className="card-header">
+            <h1 className="card-title">Projects</h1>
+          </div>
+          <div className="card-content loading-state">
+            <div className="spinner"></div>
+            <div>Loading...</div>
+          </div>
         </div>
       </div>
     )
@@ -174,8 +181,14 @@ function ProjectsPage() {
     return (
       <div className="content-area">
         <div className="card">
-          <div className="card-content unauthorized-message">
-            Unauthorized: You must be a Director or Admin to view this page.
+          <div className="card-header">
+            <h1 className="card-title">Projects</h1>
+          </div>
+          <div className="card-content">
+            <div className="unauthorized-message">
+              <i className="fas fa-exclamation-triangle" style={{ marginRight: '8px' }}></i>
+              Unauthorized: You must be a Director or Admin to view this page.
+            </div>
           </div>
         </div>
       </div>
@@ -188,7 +201,7 @@ function ProjectsPage() {
         <div className="card-header">
           <h1 className="card-title">Projects</h1>
           <button 
-            className="btn btn-primary"
+            className="btn btn-primary btn-add-project"
             onClick={() => navigate('/projects/create')}
           >
             <i className="fas fa-plus" style={{ marginRight: '8px' }}></i>

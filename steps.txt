@@ -89,4 +89,9 @@ docker-compose -f docker-compose.yml run --rm backend mvn test -Dtest=com.vtnet.
 
 npm run test
 
+4. AI Agent / Sonet-3.7: @technical-tutorials.mdc 
+Use @4.checklist_us.2.1.2.md as the example, create the checklist to implement the user stories US1.1, US1.4, US1.5, US1.6, US1.7 in @2.1.userstories_project_management.md . Write the checklist to 4.checklist_us_2.1.3.md file. Remember to use existing database and code base.
+
+5. AI Agent / Sonet-3.7: @4.checklist_us_2.1.3.md implement "US1.1: Create a New Project" (line 5). Remember to update the checklist
+
 --- TESTING ---

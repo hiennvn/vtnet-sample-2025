@@ -1,0 +1,33 @@
+.card-content {
+  padding: 20px;
+}
+
+.description {
+  margin-bottom: 20px;
+  color: #555;
+  font-size: 14px;
+}
+
+/* Card styles if not already defined in UserManagement.css */
+.card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #eaeaea;
+  background-color: #f9f9f9;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  margin: 0;
+  color: #333;
+} 

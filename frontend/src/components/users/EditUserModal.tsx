@@ -72,26 +72,26 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
       // Only fetch if we need to
       if (!selectedUser || selectedUser.id !== userId) {
         fetchRequested = true;
-        dispatch(fetchUserById(userId))
-          .unwrap()
+      dispatch(fetchUserById(userId))
+        .unwrap()
           .then((user) => {
             if (isMounted) {
               initializeFormData(user);
             }
-          })
-          .catch(() => {
+        })
+        .catch(() => {
             if (isMounted) {
-              toastService.showError('Failed to load user data', {
-                showRetry: true,
+          toastService.showError('Failed to load user data', {
+            showRetry: true,
                 onRetry: () => {
                   if (isMounted && isOpen) {
                     dispatch(fetchUserById(userId));
                   }
                 },
-              });
-              onClose();
-            }
           });
+          onClose();
+            }
+        });
       } else if (selectedUser) {
         // We already have the user data
         initializeFormData(selectedUser);

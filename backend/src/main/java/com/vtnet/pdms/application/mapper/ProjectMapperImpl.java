@@ -1,6 +1,8 @@
 package com.vtnet.pdms.application.mapper;
 
+import com.vtnet.pdms.application.dto.ProjectCreateDTO;
 import com.vtnet.pdms.application.dto.ProjectListDTO;
+import com.vtnet.pdms.application.dto.ProjectUpdateDTO;
 import com.vtnet.pdms.domain.model.Project;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -100,5 +102,37 @@ public class ProjectMapperImpl implements ProjectMapper {
                 .collect(Collectors.toList());
 
         return new PageImpl<>(dtos, projectPage.getPageable(), projectPage.getTotalElements());
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Project toEntity(ProjectCreateDTO projectCreateDTO) {
+        if (projectCreateDTO == null) {
+            return null;
+        }
+
+        Project project = new Project();
+        project.setName(projectCreateDTO.getName());
+        project.setDescription(projectCreateDTO.getDescription());
+        
+        return project;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Project updateEntityFromDto(Project project, ProjectUpdateDTO projectUpdateDTO) {
+        if (project == null || projectUpdateDTO == null) {
+            return project;
+        }
+        
+        project.setName(projectUpdateDTO.getName());
+        project.setDescription(projectUpdateDTO.getDescription());
+        project.setStatus(projectUpdateDTO.getStatus());
+        
+        return project;
     }
 } 

@@ -3,6 +3,7 @@
 export interface Project {
   id: number;
   name: string;
+  description?: string;
   status: string;
   documentCount: number;
   createdAt: string;
@@ -19,6 +20,17 @@ export interface ProjectFetchParams {
   size: number;
   status?: string;
   name?: string;
+}
+
+export interface ProjectCreatePayload {
+  name: string;
+  description?: string;
+}
+
+export interface ProjectUpdatePayload {
+  name: string;
+  description?: string;
+  status: string;
 }
 
 export interface ProjectsResponse {

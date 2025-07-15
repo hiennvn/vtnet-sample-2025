@@ -16,6 +16,9 @@ import UserManagementPage from './pages/UserManagementPage';
 import NotFoundPage from './pages/NotFoundPage';
 import LoginPage from './pages/LoginPage';
 import ProjectsPage from './pages/ProjectsPage';
+import CreateProjectPage from './pages/CreateProjectPage';
+import ProjectDetailsPage from './pages/ProjectDetailsPage';
+import EditProjectPage from './pages/EditProjectPage';
 
 const theme = createTheme();
 
@@ -70,7 +73,33 @@ function AppRoutes() {
         
         <Route path="/projects" element={
           <ProtectedRoute>
-            <ProjectsPage />
+            <MainLayout>
+              <ProjectsPage />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/projects/create" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <CreateProjectPage />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/projects/:id" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <ProjectDetailsPage />
+            </MainLayout>
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/projects/:id/edit" element={
+          <ProtectedRoute>
+            <MainLayout>
+              <EditProjectPage />
+            </MainLayout>
           </ProtectedRoute>
         } />
         
