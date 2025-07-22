@@ -112,6 +112,67 @@ services:
     networks:
       - vtnet-network
 
+  ai-api:
+    build:
+      context: ./ai
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - vtnet-network
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-postgres}
+      - OLLAMA_BASE_URL=http://ollama:11434
+    env_file: ./ai/.env
+    restart: unless-stopped
+    deploy:
+      replicas: ${API_REPLICAS:-1}
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  postgres:
+    image: pgvector/pgvector:pg17
+    ports:
+      - "5432:5432"
+    networks:
+      - vtnet-network
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-postgres}
+    volumes:
+      - .data/postgres:/var/lib/postgresql/data
+      - ./ai/chainlit-schema.sql:/docker-entrypoint-initdb.d/chainlit-schema.sql
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    networks:
+      - vtnet-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+
 volumes:
   mysql-data:
   elasticsearch-data:

@@ -1,0 +1,11 @@
+.git
+README.md
+Dockerfile
+docker-compose.yml
+.venv
+.env
+.specstory
+.cursorindexingignore
+.cursor
+.data
+.files

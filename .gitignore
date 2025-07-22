@@ -101,6 +101,7 @@ Thumbs.db
 
 # Elasticsearch
 /elasticsearch/data
+.data
 
 # Logs
 logs

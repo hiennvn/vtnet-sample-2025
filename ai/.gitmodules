@@ -1,0 +1,3 @@
+[submodule "vendors/microservices-demo"]
+	path = vendors/microservices-demo
+	url = git@github.com:GoogleCloudPlatform/microservices-demo.git
