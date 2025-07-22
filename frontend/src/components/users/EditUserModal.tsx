@@ -3,6 +3,8 @@ import { useAppDispatch, useAppSelector } from '../../redux/store';
 import { fetchUserById, updateUser, selectSelectedUser } from '../../redux/slices/userSlice';
 import { Role, User } from '../../types/user';
 import toastService from '../../services/toastService';
+import RoleDropdown from './RoleDropdown';
+import './RoleDropdown.css';
 
 interface EditUserModalProps {
   isOpen: boolean;
@@ -38,6 +40,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
   const selectedUser = useAppSelector(selectSelectedUser);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -279,7 +282,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
               </div>
 
               <div className="form-group">
-                <div className="form-check">
+                <div className="form-check standalone-checkbox">
                   <input
                     type="checkbox"
                     id="active"
@@ -297,24 +300,13 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
 
               <div className="form-group">
                 <label>Roles</label>
-                <div className="role-checkboxes">
-                  {roles.map(role => (
-                    <div className="form-check" key={role.id}>
-                      <input
-                        type="checkbox"
-                        id={`role-${role.id}`}
-                        checked={formData.roleIds.includes(role.id)}
-                        onChange={(e) => handleRoleChange(role.id, e.target.checked)}
-                        disabled={isSubmitting}
-                        className="form-check-input"
-                      />
-                      <label htmlFor={`role-${role.id}`} className="form-check-label">
-                        {role.name}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-                {errors.roleIds && <div className="invalid-feedback">{errors.roleIds}</div>}
+                <RoleDropdown
+                  roles={roles}
+                  selectedRoleIds={formData.roleIds}
+                  onChange={handleRoleChange}
+                  disabled={isSubmitting}
+                  error={errors.roleIds}
+                />
               </div>
             </div>
 
