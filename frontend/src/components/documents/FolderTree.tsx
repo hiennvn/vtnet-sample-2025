@@ -24,13 +24,19 @@ const FolderTree: React.FC<FolderTreeProps> = ({ projectId, onFolderSelect, sele
     dispatch(fetchProjectRootFolders(projectId));
   }, [dispatch, projectId]);
 
+  // Check if a folder has subfolders
+  const hasFolderChildren = (folderId: number): boolean => {
+    return folders.some(folder => folder.parentFolderId === folderId);
+  };
+
   // Handle folder expansion
-  const handleFolderToggle = (folder: FolderDTO) => {
+  const handleFolderToggle = async (folder: FolderDTO, event: React.MouseEvent) => {
+    event.stopPropagation();
     const isExpanded = expandedFolders[folder.id] || false;
     
     // If expanding and not loaded yet, fetch subfolders
-    if (!isExpanded && folder.hasSubfolders && !loadedFolders[folder.id]) {
-      dispatch(fetchSubfolders(folder.id));
+    if (!isExpanded && !loadedFolders[folder.id]) {
+      await dispatch(fetchSubfolders(folder.id));
       setLoadedFolders({ ...loadedFolders, [folder.id]: true });
     }
     
@@ -46,6 +52,8 @@ const FolderTree: React.FC<FolderTreeProps> = ({ projectId, onFolderSelect, sele
   const renderFolder = (folder: FolderDTO, level: number = 0) => {
     const isExpanded = expandedFolders[folder.id] || false;
     const isSelected = selectedFolderId === folder.id;
+    const childFolders = folders.filter(child => child.parentFolderId === folder.id);
+    const hasChildren = childFolders.length > 0 || !loadedFolders[folder.id];
     
     return (
       <div key={folder.id} className="folder-tree-item" style={{ marginLeft: `${level * 16}px` }}>
@@ -53,13 +61,10 @@ const FolderTree: React.FC<FolderTreeProps> = ({ projectId, onFolderSelect, sele
           className={`folder-tree-node ${isSelected ? 'selected' : ''}`}
           onClick={() => handleFolderSelect(folder)}
         >
-          {folder.hasSubfolders && (
+          {hasChildren && (
             <span 
               className={`folder-toggle ${isExpanded ? 'expanded' : ''}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleFolderToggle(folder);
-              }}
+              onClick={(e) => handleFolderToggle(folder, e)}
             >
               {isExpanded ? '▼' : '▶'}
             </span>
@@ -68,11 +73,9 @@ const FolderTree: React.FC<FolderTreeProps> = ({ projectId, onFolderSelect, sele
           <span className="folder-name">{folder.name}</span>
         </div>
         
-        {isExpanded && (
+        {isExpanded && childFolders.length > 0 && (
           <div className="folder-children">
-            {folders
-              .filter(child => child.parentFolderId === folder.id)
-              .map(childFolder => renderFolder(childFolder, level + 1))}
+            {childFolders.map(childFolder => renderFolder(childFolder, level + 1))}
           </div>
         )}
       </div>
@@ -87,13 +90,18 @@ const FolderTree: React.FC<FolderTreeProps> = ({ projectId, onFolderSelect, sele
     return <div className="folder-tree-error">Error: {error}</div>;
   }
 
+  // Get root folders
+  const rootFolders = folders.filter(folder => folder.parentFolderId === null);
+
   return (
     <div className="folder-tree">
       <div className="folder-tree-header">Folders</div>
       <div className="folder-tree-content">
-        {folders
-          .filter(folder => folder.parentFolderId === null)
-          .map(folder => renderFolder(folder))}
+        {rootFolders.length > 0 ? (
+          rootFolders.map(folder => renderFolder(folder))
+        ) : (
+          <div className="folder-tree-empty">No folders found</div>
+        )}
       </div>
     </div>
   );

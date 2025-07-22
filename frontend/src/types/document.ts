@@ -10,5 +10,5 @@ export interface DocumentDTO {
   fileType: string;
   size: number;
   createdAt: string;
-  createdBy: string;
+  createdBy: string | { id: number; name: string; email: string; roles?: string[] };
 } 

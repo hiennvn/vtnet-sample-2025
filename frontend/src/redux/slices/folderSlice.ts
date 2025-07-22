@@ -34,7 +34,8 @@ export const fetchSubfolders = createAsyncThunk(
   'folders/fetchSubfolders',
   async (folderId: number, { rejectWithValue }) => {
     try {
-      return await folderApi.getSubfolders(folderId);
+      const subfolders = await folderApi.getSubfolders(folderId);
+      return { folderId, subfolders };
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch subfolders');
     }
@@ -98,9 +99,17 @@ const folderSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(fetchSubfolders.fulfilled, (state, action: PayloadAction<FolderDTO[]>) => {
+    builder.addCase(fetchSubfolders.fulfilled, (state, action: PayloadAction<{ folderId: number, subfolders: FolderDTO[] }>) => {
       state.loading = false;
-      state.folders = action.payload;
+      
+      // Get the parent folder ID and subfolders
+      const { folderId, subfolders } = action.payload;
+      
+      // Filter out any existing subfolders of this parent to avoid duplicates
+      const filteredFolders = state.folders.filter(folder => folder.parentFolderId !== folderId);
+      
+      // Combine the existing folders with the new subfolders
+      state.folders = [...filteredFolders, ...subfolders];
     });
     builder.addCase(fetchSubfolders.rejected, (state, action) => {
       state.loading = false;

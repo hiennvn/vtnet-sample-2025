@@ -8,13 +8,17 @@ import {
   selectProjectError,
   deleteProject
 } from '../redux/slices/projectSlice';
+import { fetchProjectDocuments } from '../redux/slices/documentSlice';
 import { Card, CardHeader, CardContent, Typography, Button, Skeleton, Alert, Stack, Divider } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon, People as PeopleIcon, Folder as FolderIcon } from '@mui/icons-material';
 import { format } from 'date-fns';
 import './ProjectDetailsPage.css';
 import '../components/users/UserManagement.css';
+import '../components/documents/DocumentList.css';
 import DeleteProjectConfirmation from '../components/projects/DeleteProjectConfirmation';
 import toastService from '../services/toastService';
+import { DocumentDTO } from '../types/document';
+import { formatDate } from '../utils/dateUtils';
 
 const ProjectDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,10 +28,12 @@ const ProjectDetailsPage: React.FC = () => {
   const loading = useAppSelector(selectProjectLoading);
   const error = useAppSelector(selectProjectError);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const { documents, loading: documentsLoading } = useAppSelector((state) => state.documents);
 
   useEffect(() => {
     if (id) {
       dispatch(fetchProjectById(Number(id)));
+      dispatch(fetchProjectDocuments(Number(id)));
     }
   }, [dispatch, id]);
 
@@ -70,6 +76,50 @@ const ProjectDetailsPage: React.FC = () => {
       }
     }
   };
+
+  // Get file icon based on file type
+  const getFileIcon = (fileType: string | undefined | null): string => {
+    if (!fileType) return '📎'; // Default icon for undefined or null fileType
+    
+    const type = fileType.toLowerCase();
+    if (type.includes('image') || type.endsWith('png') || type.endsWith('jpg') || type.endsWith('jpeg') || type.endsWith('gif')) {
+      return '🖼️';
+    } else if (type.endsWith('pdf')) {
+      return '📄';
+    } else if (type.includes('excel') || type.endsWith('xlsx') || type.endsWith('xls') || type.endsWith('csv')) {
+      return '📊';
+    } else if (type.includes('powerpoint') || type.endsWith('ppt') || type.endsWith('pptx')) {
+      return '📑';
+    } else if (type.includes('word') || type.endsWith('doc') || type.endsWith('docx')) {
+      return '📝';
+    } else if (type.includes('text') || type.endsWith('txt')) {
+      return '📃';
+    } else {
+      return '📎';
+    }
+  };
+
+  // Format file size for display
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) {
+      return bytes + ' B';
+    } else if (bytes < 1024 * 1024) {
+      return (bytes / 1024).toFixed(1) + ' KB';
+    } else if (bytes < 1024 * 1024 * 1024) {
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    } else {
+      return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+    }
+  };
+
+  // Handle document selection
+  const handleDocumentSelect = (document: DocumentDTO) => {
+    // In the future, navigate to document viewer
+    console.log('Selected document:', document);
+  };
+
+  // Calculate the total document count including files in folders
+  const documentCount = documents ? documents.length : project?.documentCount || 0;
 
   if (loading) {
     return (
@@ -153,7 +203,7 @@ const ProjectDetailsPage: React.FC = () => {
                 <strong>Created:</strong> {format(new Date(project.createdAt), 'MMM d, yyyy')}
               </Typography>
               <Typography variant="body2">
-                <strong>Documents:</strong> {project.documentCount || 0}
+                <strong>Documents:</strong> {documentCount}
               </Typography>
             </Stack>
           </CardContent>
@@ -174,11 +224,43 @@ const ProjectDetailsPage: React.FC = () => {
           />
           <Divider />
           <CardContent>
-            <Typography variant="body1" sx={{ py: 4, textAlign: 'center' }}>
-              {project.documentCount ? 
-                `This project has ${project.documentCount} documents. Click "Browse Documents" to view them.` : 
-                'No documents available in this project yet.'}
-            </Typography>
+            {documentsLoading ? (
+              <div className="document-list-loading">Loading documents...</div>
+            ) : documents.length === 0 ? (
+              <Typography variant="body1" sx={{ py: 4, textAlign: 'center' }}>
+                No documents available in this project yet.
+              </Typography>
+            ) : (
+              <div className="document-list" style={{ maxHeight: '400px' }}>
+                <div className="document-list-header">
+                  <div className="document-list-header-name">Name</div>
+                  <div className="document-list-header-size">Size</div>
+                  <div className="document-list-header-created">Created</div>
+                  <div className="document-list-header-by">Created By</div>
+                </div>
+                <div className="document-list-content">
+                  {documents.map((document) => (
+                    <div
+                      key={document.id}
+                      className="document-list-item"
+                      onClick={() => handleDocumentSelect(document)}
+                    >
+                      <div className="document-list-item-name">
+                        <span className="document-icon">{getFileIcon(document.fileType)}</span>
+                        <span className="document-name">{document.name || 'Unnamed document'}</span>
+                      </div>
+                      <div className="document-list-item-size">{document.size ? formatFileSize(document.size) : 'Unknown'}</div>
+                      <div className="document-list-item-created">{document.createdAt ? formatDate(document.createdAt) : 'Unknown'}</div>
+                      <div className="document-list-item-by">
+                        {typeof document.createdBy === 'object' && document.createdBy !== null
+                          ? (document.createdBy as any).name || 'Unknown'
+                          : document.createdBy || 'Unknown'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
         
