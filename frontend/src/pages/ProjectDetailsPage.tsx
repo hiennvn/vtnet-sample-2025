@@ -12,6 +12,7 @@ import { Card, CardHeader, CardContent, Typography, Button, Skeleton, Alert, Sta
 import { Edit as EditIcon, Delete as DeleteIcon, People as PeopleIcon, Folder as FolderIcon } from '@mui/icons-material';
 import { format } from 'date-fns';
 import './ProjectDetailsPage.css';
+import '../components/users/UserManagement.css';
 import DeleteProjectConfirmation from '../components/projects/DeleteProjectConfirmation';
 import toastService from '../services/toastService';
 
@@ -72,114 +73,122 @@ const ProjectDetailsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <Card>
-        <CardHeader title={<Skeleton variant="text" width="60%" />} />
-        <CardContent>
-          <Skeleton variant="text" width="90%" />
-          <Skeleton variant="text" width="80%" />
-          <Skeleton variant="text" width="70%" />
-        </CardContent>
-      </Card>
+      <div className="content-area">
+        <Card>
+          <CardHeader title={<Skeleton variant="text" width="60%" />} />
+          <CardContent>
+            <Skeleton variant="text" width="90%" />
+            <Skeleton variant="text" width="80%" />
+            <Skeleton variant="text" width="70%" />
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Alert severity="error" sx={{ mb: 2 }}>
-        {error}
-      </Alert>
+      <div className="content-area">
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      </div>
     );
   }
 
   if (!project) {
     return (
-      <Alert severity="info" sx={{ mb: 2 }}>
-        Project not found
-      </Alert>
+      <div className="content-area">
+        <Alert severity="info" sx={{ mb: 2 }}>
+          Project not found
+        </Alert>
+      </div>
     );
   }
 
   return (
-    <div className="project-details-page">
-      <Card className="card">
-        <CardHeader
-          title={project.name}
-          action={
-            <Stack direction="row" spacing={1}>
-              <Button 
-                variant="outlined" 
-                startIcon={<EditIcon />}
-                onClick={handleEdit}
-              >
-                Edit
-              </Button>
-              <Button 
-                variant="outlined" 
-                startIcon={<PeopleIcon />}
-                onClick={handleManageMembers}
-              >
-                Members
-              </Button>
-              <Button 
-                variant="outlined" 
-                color="error" 
-                startIcon={<DeleteIcon />}
-                onClick={handleDeleteClick}
-              >
-                Delete
-              </Button>
+    <div className="content-area">
+      <div className="project-details-page">
+        <Card className="card">
+          <CardHeader
+            title={project.name}
+            action={
+              <Stack direction="row" spacing={1}>
+                <Button 
+                  variant="outlined" 
+                  startIcon={<EditIcon />}
+                  onClick={handleEdit}
+                >
+                  Edit
+                </Button>
+                <Button 
+                  variant="outlined" 
+                  startIcon={<PeopleIcon />}
+                  onClick={handleManageMembers}
+                >
+                  Members
+                </Button>
+                <Button 
+                  variant="outlined" 
+                  color="error" 
+                  startIcon={<DeleteIcon />}
+                  onClick={handleDeleteClick}
+                >
+                  Delete
+                </Button>
+              </Stack>
+            }
+          />
+          <Divider />
+          <CardContent className="card-content">
+            <Typography variant="body1" className="description">
+              {project.description || 'No description provided'}
+            </Typography>
+            
+            <Stack direction="row" spacing={4} sx={{ mt: 2 }}>
+              <Typography variant="body2">
+                <strong>Status:</strong> {project.status}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Created:</strong> {format(new Date(project.createdAt), 'MMM d, yyyy')}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Documents:</strong> {project.documentCount || 0}
+              </Typography>
             </Stack>
-          }
-        />
-        <Divider />
-        <CardContent className="card-content">
-          <Typography variant="body1" className="description">
-            {project.description || 'No description provided'}
-          </Typography>
-          
-          <Stack direction="row" spacing={4} sx={{ mt: 2 }}>
-            <Typography variant="body2">
-              <strong>Status:</strong> {project.status}
-            </Typography>
-            <Typography variant="body2">
-              <strong>Created:</strong> {format(new Date(project.createdAt), 'MMM d, yyyy')}
-            </Typography>
-            <Typography variant="body2">
-              <strong>Documents:</strong> {project.documentCount || 0}
-            </Typography>
-          </Stack>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      <Card sx={{ mt: 3 }}>
-        <CardHeader 
-          title="Documents" 
-          action={
-            <Button 
-              variant="contained" 
-              startIcon={<FolderIcon />}
-              onClick={handleViewDocuments}
-            >
-              Browse Documents
-            </Button>
-          }
+        <Card sx={{ mt: 3 }}>
+          <CardHeader 
+            title="Documents" 
+            action={
+              <Button 
+                variant="contained" 
+                startIcon={<FolderIcon />}
+                onClick={handleViewDocuments}
+              >
+                Browse Documents
+              </Button>
+            }
+          />
+          <Divider />
+          <CardContent>
+            <Typography variant="body1" sx={{ py: 4, textAlign: 'center' }}>
+              {project.documentCount ? 
+                `This project has ${project.documentCount} documents. Click "Browse Documents" to view them.` : 
+                'No documents available in this project yet.'}
+            </Typography>
+          </CardContent>
+        </Card>
+        
+        <DeleteProjectConfirmation
+          projectName={project.name}
+          isOpen={isDeleteDialogOpen}
+          onConfirm={handleDeleteConfirm}
+          onCancel={handleDeleteCancel}
         />
-        <Divider />
-        <CardContent>
-          <Typography variant="body1" sx={{ py: 4, textAlign: 'center' }}>
-            {project.documentCount ? 
-              `This project has ${project.documentCount} documents. Click "Browse Documents" to view them.` : 
-              'No documents available in this project yet.'}
-          </Typography>
-        </CardContent>
-      </Card>
-      
-      <DeleteProjectConfirmation
-        projectName={project.name}
-        isOpen={isDeleteDialogOpen}
-        onConfirm={handleDeleteConfirm}
-        onCancel={handleDeleteCancel}
-      />
+      </div>
     </div>
   );
 };
