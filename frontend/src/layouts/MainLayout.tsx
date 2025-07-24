@@ -2,17 +2,34 @@ import { ReactNode, useState, useRef, useCallback } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useClickOutside } from '../hooks/useClickOutside'
+import { useSelector } from 'react-redux'
+import { RootState } from '../redux/store'
+import ChatbotButton from '../components/common/ChatbotButton'
+import ChatbotInterface from '../components/common/ChatbotInterface'
 import './MainLayout.css'
 
 interface MainLayoutProps {
   children: ReactNode
+  projectId?: number
 }
 
-function MainLayout({ children }: MainLayoutProps) {
+function MainLayout({ children, projectId }: MainLayoutProps) {
   const location = useLocation()
   const { user, logoutUser } = useAuth()
   const [showDropdown, setShowDropdown] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const [isChatbotOpen, setIsChatbotOpen] = useState(false)
+  const { user: stateUser } = useSelector((state: RootState) => state.auth)
+  
+  // Check if user is a director
+  const isDirector = stateUser?.roles?.some((role: any) => {
+    if (typeof role === 'string') {
+      return role === 'ROLE_DIRECTOR' || role === 'DIRECTOR' || role === 'ROLE_ADMIN'
+    } else if (role && typeof role === 'object' && 'name' in role) {
+      return role.name === 'ROLE_DIRECTOR' || role.name === 'DIRECTOR'
+    }
+    return false
+  }) || false
   
   // Check if a path is active
   const isActive = (path: string) => {
@@ -47,6 +64,21 @@ function MainLayout({ children }: MainLayoutProps) {
     }
     
     return nameParts[0][0].toUpperCase()
+  }
+  
+  // Toggle chatbot visibility
+  const toggleChatbot = () => {
+    setIsChatbotOpen(!isChatbotOpen)
+  }
+  
+  // Format role display
+  const formatRoleDisplay = (role: any): string => {
+    if (typeof role === 'string') {
+      return role
+    } else if (role && typeof role === 'object' && 'name' in role) {
+      return role.name
+    }
+    return 'Unknown Role'
   }
   
   return (
@@ -92,7 +124,9 @@ function MainLayout({ children }: MainLayoutProps) {
                     <div>{user?.email}</div>
                     <div className="user-roles">
                       {user?.roles?.map((role, index) => (
-                        <span key={index} className="role-badge">{role}</span>
+                        <span key={index} className="role-badge">
+                          {formatRoleDisplay(role)}
+                        </span>
                       ))}
                     </div>
                   </div>
@@ -116,6 +150,15 @@ function MainLayout({ children }: MainLayoutProps) {
           <p>&copy; {new Date().getFullYear()} VTNet Project Management System</p>
         </div>
       </footer>
+      
+      {/* Chatbot */}
+      <ChatbotButton onClick={toggleChatbot} isOpen={isChatbotOpen} />
+      <ChatbotInterface 
+        onClose={() => setIsChatbotOpen(false)} 
+        projectId={projectId} 
+        isOpen={isChatbotOpen}
+        isDirector={isDirector}
+      />
     </div>
   )
 }

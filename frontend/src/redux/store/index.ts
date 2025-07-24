@@ -9,6 +9,7 @@ import projectReducer from '../slices/projectSlice';
 import projectMemberReducer from '../slices/projectMemberSlice';
 import documentReducer from '../slices/documentSlice';
 import folderReducer from '../slices/folderSlice';
+import chatReducer from '../slices/chatSlice';
 
 export const store = configureStore({
   reducer: {
@@ -19,6 +20,7 @@ export const store = configureStore({
     projectMembers: projectMemberReducer,
     documents: documentReducer,
     folders: folderReducer,
+    chat: chatReducer,
   },
   middleware: (getDefaultMiddleware) => 
     getDefaultMiddleware({
