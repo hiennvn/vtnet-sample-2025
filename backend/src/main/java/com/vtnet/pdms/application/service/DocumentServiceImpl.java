@@ -173,4 +173,26 @@ public class DocumentServiceImpl implements DocumentService {
             folderService.getFolderById(uploadDTO.getFolderId());
         }
     }
+
+    @Override
+    @Transactional
+    @PreAuthorize("@customPermissionEvaluator.hasDocumentAccess(#id)")
+    public void deleteDocument(Long id) {
+        Document document = getDocumentById(id);
+        
+        // Delete the document file from storage
+        for (DocumentVersion version : document.getVersions()) {
+            try {
+                storageService.delete(version.getStoragePath());
+            } catch (Exception e) {
+                // Log the error but continue with database deletion
+                // This ensures the document is removed from the database even if file deletion fails
+                // In a production environment, you might want to handle this differently
+                System.err.println("Failed to delete document file: " + e.getMessage());
+            }
+        }
+        
+        // Delete the document from the database
+        documentRepository.delete(document);
+    }
 } 

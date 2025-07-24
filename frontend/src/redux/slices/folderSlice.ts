@@ -67,6 +67,18 @@ export const createFolder = createAsyncThunk(
   }
 );
 
+export const deleteFolder = createAsyncThunk(
+  'folders/deleteFolder',
+  async (folderId: number, { rejectWithValue }) => {
+    try {
+      await folderApi.deleteFolder(folderId);
+      return folderId;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete folder');
+    }
+  }
+);
+
 // Create the slice
 const folderSlice = createSlice({
   name: 'folders',
@@ -147,6 +159,23 @@ const folderSlice = createSlice({
       }
     });
     builder.addCase(createFolder.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    });
+
+    // deleteFolder
+    builder.addCase(deleteFolder.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(deleteFolder.fulfilled, (state, action: PayloadAction<number>) => {
+      state.loading = false;
+      state.folders = state.folders.filter(folder => folder.id !== action.payload);
+      if (state.currentFolder && state.currentFolder.id === action.payload) {
+        state.currentFolder = null;
+      }
+    });
+    builder.addCase(deleteFolder.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload as string;
     });

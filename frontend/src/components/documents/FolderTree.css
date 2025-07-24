@@ -1,12 +1,9 @@
 .folder-tree {
-  width: 100%;
   border: 1px solid #e0e0e0;
   border-radius: 4px;
   background-color: #ffffff;
-  overflow: auto;
   height: 100%;
-  display: flex;
-  flex-direction: column;
+  overflow: auto;
 }
 
 .folder-tree-header {
@@ -18,8 +15,6 @@
 
 .folder-tree-content {
   padding: 8px 0;
-  overflow-y: auto;
-  flex: 1;
 }
 
 .folder-tree-item {
@@ -29,9 +24,11 @@
 .folder-tree-node {
   display: flex;
   align-items: center;
-  padding: 6px 8px;
+  justify-content: space-between;
+  padding: 6px 12px;
   cursor: pointer;
   border-radius: 4px;
+  transition: background-color 0.2s;
 }
 
 .folder-tree-node:hover {
@@ -42,15 +39,22 @@
   background-color: #e6f7ff;
 }
 
-.folder-toggle {
-  display: inline-flex;
+.folder-tree-node-content {
+  display: flex;
   align-items: center;
-  justify-content: center;
+  flex: 1;
+  overflow: hidden;
+}
+
+.folder-toggle {
+  display: inline-block;
   width: 16px;
   height: 16px;
+  text-align: center;
+  line-height: 16px;
   margin-right: 4px;
-  font-size: 10px;
   cursor: pointer;
+  font-size: 10px;
 }
 
 .folder-icon {
@@ -64,12 +68,34 @@
   text-overflow: ellipsis;
 }
 
+.folder-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.folder-tree-node:hover .folder-actions {
+  opacity: 1;
+}
+
+.folder-delete-btn {
+  font-size: 12px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .folder-children {
   margin-left: 8px;
 }
 
 .folder-tree-loading,
-.folder-tree-error {
+.folder-tree-error,
+.folder-tree-empty {
   padding: 16px;
   text-align: center;
   color: #666;

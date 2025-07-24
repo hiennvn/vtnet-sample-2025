@@ -164,4 +164,27 @@ public class DocumentController {
         DocumentDTO documentDTO = documentMapper.toDto(document);
         return ResponseEntity.status(HttpStatus.CREATED).body(documentDTO);
     }
+
+    /**
+     * DELETE /api/documents/{id} : Delete a document by ID.
+     *
+     * @param id The document ID
+     * @return No content
+     */
+    @DeleteMapping("/documents/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(
+        summary = "Delete a document by ID",
+        description = "Delete a document by its ID. Requires PROJECT_MANAGER role.",
+        responses = {
+            @ApiResponse(responseCode = "204", description = "Document deleted successfully"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - requires PROJECT_MANAGER role"),
+            @ApiResponse(responseCode = "404", description = "Document not found")
+        }
+    )
+    public ResponseEntity<Void> deleteDocument(@PathVariable Long id) {
+        documentService.deleteDocument(id);
+        return ResponseEntity.noContent().build();
+    }
 } 

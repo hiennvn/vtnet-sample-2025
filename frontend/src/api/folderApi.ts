@@ -50,3 +50,12 @@ export const createFolder = async (
   });
   return response.data;
 }; 
+
+/**
+ * Delete a folder by ID
+ * @param folderId The folder ID to delete
+ * @returns Promise with void
+ */
+export const deleteFolder = async (folderId: number): Promise<void> => {
+  await axiosInstance.delete(`/api/folders/${folderId}`);
+}; 

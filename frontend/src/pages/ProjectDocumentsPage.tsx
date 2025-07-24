@@ -139,6 +139,7 @@ const ProjectDocumentsPage: React.FC = () => {
               projectId={parseInt(projectId!)}
               onFolderSelect={handleFolderSelect}
               selectedFolderId={currentFolder?.id}
+              isProjectManager={isProjectManager}
             />
           </div>
           
@@ -193,6 +194,7 @@ const ProjectDocumentsPage: React.FC = () => {
               <DocumentList
                 onDocumentSelect={handleDocumentSelect}
                 selectedDocumentId={selectedDocument?.id}
+                isProjectManager={isProjectManager}
               />
             )}
           </div>
