@@ -7,6 +7,7 @@ import ProjectMemberList from '../components/projects/ProjectMemberList';
 import AddMemberForm from '../components/projects/AddMemberForm';
 import MainLayout from '../layouts/MainLayout';
 import './ProjectMembersPage.css';
+import '../components/users/UserManagement.css';
 
 interface RoleObject {
   id: number;
@@ -52,30 +53,39 @@ const ProjectMembersPage: React.FC = () => {
   if (!project) {
     return (
       <MainLayout>
-        <div className="loading">Loading project details...</div>
+        <div className="content-area">
+          <div className="loading">Loading project details...</div>
+        </div>
       </MainLayout>
     );
   }
 
   return (
     <MainLayout>
-      <div className="project-members-page">
-        <div className="page-header">
-          <button className="back-button" onClick={handleBackClick}>
-            &larr; Back to Project
-          </button>
-          <h2>Project Members: {project.name}</h2>
-        </div>
-
-        <div className="content">
-          <ProjectMemberList 
-            projectId={Number(projectId)} 
-            canManage={hasManagePermission} 
-          />
-          
-          {hasManagePermission && (
-            <AddMemberForm projectId={Number(projectId)} />
-          )}
+      <div className="content-area">
+        <div className="project-members-page">
+          <div className="card">
+            <div className="card-header">
+              <button className="btn btn-outline" onClick={handleBackClick}>
+                <i className="fas fa-arrow-left" style={{ marginRight: '8px' }}></i>
+                Back to Project
+              </button>
+              <h1 className="card-title">Project Members: {project.name}</h1>
+            </div>
+            
+            <div className="card-content">
+              <div className="members-container">
+                <ProjectMemberList 
+                  projectId={Number(projectId)} 
+                  canManage={hasManagePermission} 
+                />
+                
+                {hasManagePermission && (
+                  <AddMemberForm projectId={Number(projectId)} />
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </MainLayout>
