@@ -198,6 +198,29 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles illegal argument exceptions.
+     *
+     * @param ex      The exception
+     * @param request The web request
+     * @return Response with error details
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiError> handleIllegalArgumentException(
+            IllegalArgumentException ex, WebRequest request) {
+        
+        ApiError apiError = new ApiError(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", "")
+        );
+
+        logger.warn("Illegal argument: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiError);
+    }
+
+    /**
      * Handles all other exceptions.
      *
      * @param ex      The exception

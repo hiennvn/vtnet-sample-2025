@@ -1,8 +1,8 @@
 .project-documents-page {
-  padding: 20px;
-  height: calc(100vh - 80px);
+  height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
+  padding: 0;
 }
 
 .project-documents-title {
@@ -18,12 +18,14 @@
 
 .project-documents-sidebar {
   width: 250px;
-  overflow: hidden;
+  overflow: auto;
+  border-right: 1px solid #eaeaea;
+  padding-right: 15px;
 }
 
 .project-documents-content {
   flex: 1;
-  overflow: hidden;
+  overflow: auto;
   display: flex;
   flex-direction: column;
 }

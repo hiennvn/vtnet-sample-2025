@@ -79,3 +79,12 @@ export const uploadDocument = async (
   
   return response.data;
 }; 
+
+/**
+ * Delete a document by ID
+ * @param documentId The document ID to delete
+ * @returns Promise with void
+ */
+export const deleteDocument = async (documentId: number): Promise<void> => {
+  await axiosInstance.delete(`/api/documents/${documentId}`);
+}; 

@@ -34,7 +34,8 @@ export const fetchSubfolders = createAsyncThunk(
   'folders/fetchSubfolders',
   async (folderId: number, { rejectWithValue }) => {
     try {
-      return await folderApi.getSubfolders(folderId);
+      const subfolders = await folderApi.getSubfolders(folderId);
+      return { folderId, subfolders };
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to fetch subfolders');
     }
@@ -62,6 +63,18 @@ export const createFolder = createAsyncThunk(
       return await folderApi.createFolder(name, projectId, parentFolderId);
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Failed to create folder');
+    }
+  }
+);
+
+export const deleteFolder = createAsyncThunk(
+  'folders/deleteFolder',
+  async (folderId: number, { rejectWithValue }) => {
+    try {
+      await folderApi.deleteFolder(folderId);
+      return folderId;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete folder');
     }
   }
 );
@@ -98,9 +111,17 @@ const folderSlice = createSlice({
       state.loading = true;
       state.error = null;
     });
-    builder.addCase(fetchSubfolders.fulfilled, (state, action: PayloadAction<FolderDTO[]>) => {
+    builder.addCase(fetchSubfolders.fulfilled, (state, action: PayloadAction<{ folderId: number, subfolders: FolderDTO[] }>) => {
       state.loading = false;
-      state.folders = action.payload;
+      
+      // Get the parent folder ID and subfolders
+      const { folderId, subfolders } = action.payload;
+      
+      // Filter out any existing subfolders of this parent to avoid duplicates
+      const filteredFolders = state.folders.filter(folder => folder.parentFolderId !== folderId);
+      
+      // Combine the existing folders with the new subfolders
+      state.folders = [...filteredFolders, ...subfolders];
     });
     builder.addCase(fetchSubfolders.rejected, (state, action) => {
       state.loading = false;
@@ -138,6 +159,23 @@ const folderSlice = createSlice({
       }
     });
     builder.addCase(createFolder.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload as string;
+    });
+
+    // deleteFolder
+    builder.addCase(deleteFolder.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(deleteFolder.fulfilled, (state, action: PayloadAction<number>) => {
+      state.loading = false;
+      state.folders = state.folders.filter(folder => folder.id !== action.payload);
+      if (state.currentFolder && state.currentFolder.id === action.payload) {
+        state.currentFolder = null;
+      }
+    });
+    builder.addCase(deleteFolder.rejected, (state, action) => {
       state.loading = false;
       state.error = action.payload as string;
     });

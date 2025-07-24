@@ -1,5 +1,5 @@
 .project-members-page {
-  padding: 20px;
+  width: 100%;
 }
 
 .project-members-page .page-header {
@@ -31,8 +31,29 @@
   max-width: 900px;
 }
 
+.members-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
 .loading {
-  padding: 20px;
-  font-size: 1.1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  font-size: 16px;
   color: #666;
+}
+
+/* Card content styles */
+.card-content {
+  padding: 20px;
+}
+
+/* Responsive layout */
+@media (max-width: 768px) {
+  .members-container {
+    grid-template-columns: 1fr;
+  }
 } 

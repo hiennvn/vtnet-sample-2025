@@ -82,6 +82,18 @@ export const uploadDocument = createAsyncThunk(
   }
 );
 
+export const deleteDocument = createAsyncThunk(
+  'documents/deleteDocument',
+  async (documentId: number, { rejectWithValue }) => {
+    try {
+      await documentApi.deleteDocument(documentId);
+      return documentId;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to delete document');
+    }
+  }
+);
+
 // Create the slice
 const documentSlice = createSlice({
   name: 'documents',
@@ -170,6 +182,23 @@ const documentSlice = createSlice({
     builder.addCase(uploadDocument.rejected, (state, action) => {
       state.uploading = false;
       state.uploadSuccess = false;
+      state.error = action.payload as string;
+    });
+
+    // deleteDocument
+    builder.addCase(deleteDocument.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
+    builder.addCase(deleteDocument.fulfilled, (state, action: PayloadAction<number>) => {
+      state.loading = false;
+      state.documents = state.documents.filter(doc => doc.id !== action.payload);
+      if (state.currentDocument && state.currentDocument.id === action.payload) {
+        state.currentDocument = null;
+      }
+    });
+    builder.addCase(deleteDocument.rejected, (state, action) => {
+      state.loading = false;
       state.error = action.payload as string;
     });
   }

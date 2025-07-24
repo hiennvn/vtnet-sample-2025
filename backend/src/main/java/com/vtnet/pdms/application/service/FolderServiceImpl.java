@@ -132,10 +132,22 @@ public class FolderServiceImpl implements FolderService {
         }
         
         // Check if folder has subfolders
-        if (!folder.getSubfolders().isEmpty()) {
+        List<Folder> subfolders = getSubfolders(folderId);
+        if (!subfolders.isEmpty()) {
             throw new IllegalStateException("Cannot delete folder that contains subfolders");
         }
         
+        // Delete the folder from storage
+        try {
+            String projectPath = "projects/" + folder.getProject().getId();
+            String folderPath = projectPath + "/" + folder.getId();
+            storageService.delete(folderPath);
+        } catch (Exception e) {
+            // Log the error but continue with database deletion
+            System.err.println("Failed to delete folder from storage: " + e.getMessage());
+        }
+        
+        // Delete the folder from the database
         folderRepository.delete(folder);
     }
     

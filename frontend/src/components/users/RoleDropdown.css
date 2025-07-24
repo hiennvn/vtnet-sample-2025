@@ -1,0 +1,139 @@
+.dropdown-container {
+  position: relative;
+}
+
+.dropdown-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  width: 100%;
+}
+
+.dropdown-toggle .caret {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 0.255em;
+  vertical-align: 0.255em;
+  border-top: 0.3em solid;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0;
+  border-left: 0.3em solid transparent;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  display: none;
+  float: left;
+  min-width: 10rem;
+  padding: 0.5rem 0;
+  margin: 0.125rem 0 0;
+  font-size: 1rem;
+  color: #212529;
+  text-align: left;
+  list-style: none;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 0.25rem;
+  max-height: 200px;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.dropdown-menu.show {
+  display: block;
+}
+
+.dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 0.25rem 1.5rem;
+  clear: both;
+  font-weight: 400;
+  color: #212529;
+  text-align: inherit;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+  color: #16181b;
+  text-decoration: none;
+  background-color: #f8f9fa;
+}
+
+/* Fix checkbox alignment */
+.dropdown-item .form-check {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.dropdown-item .form-check-input {
+  margin: 0;
+  margin-right: 8px;
+  position: static;
+  flex-shrink: 0;
+  width: auto;
+  height: auto;
+}
+
+.dropdown-item .form-check-label {
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;
+}
+
+/* General form-check alignment for use throughout the app */
+.form-check.aligned {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.form-check.aligned .form-check-input {
+  margin: 0;
+  margin-right: 4px;
+  position: relative;
+  flex-shrink: 0;
+  top: 0;
+}
+
+.form-check.aligned .form-check-label {
+  margin: 0;
+  padding: 0;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;
+}
+
+/* Specific styling for standalone checkboxes (like the Active checkbox) */
+.standalone-checkbox {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.standalone-checkbox .form-check-input {
+  margin: 0;
+  margin-right: 6px;
+  position: static;
+  flex-shrink: 0;
+  height: 16px;
+  width: 16px;
+}
+
+.standalone-checkbox .form-check-label {
+  margin: 0;
+  padding: 0;
+} 

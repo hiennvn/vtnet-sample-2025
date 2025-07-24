@@ -155,4 +155,33 @@ public class FolderController {
         FolderDTO folderDTO = folderMapper.toDto(folder);
         return ResponseEntity.status(HttpStatus.CREATED).body(folderDTO);
     }
+
+    /**
+     * DELETE /api/folders/{id} : Delete a folder by ID.
+     *
+     * @param id The folder ID
+     * @return No content
+     */
+    @DeleteMapping("/folders/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(
+        summary = "Delete a folder by ID",
+        description = "Delete a folder by its ID. The folder must be empty. Requires PROJECT_MANAGER role.",
+        responses = {
+            @ApiResponse(responseCode = "204", description = "Folder deleted successfully"),
+            @ApiResponse(responseCode = "400", description = "Bad request - folder is not empty"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - requires PROJECT_MANAGER role"),
+            @ApiResponse(responseCode = "404", description = "Folder not found")
+        }
+    )
+    public ResponseEntity<Void> deleteFolder(@PathVariable Long id) {
+        try {
+            folderService.deleteFolder(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalStateException e) {
+            // Return 400 Bad Request if folder is not empty
+            throw new IllegalArgumentException(e.getMessage());
+        }
+    }
 } 

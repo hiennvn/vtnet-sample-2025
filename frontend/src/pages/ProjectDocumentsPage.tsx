@@ -8,6 +8,7 @@ import { FolderTree, DocumentList, Breadcrumbs, DocumentUpload, CreateFolderDial
 import { DocumentDTO } from '../types/document';
 import { FolderDTO } from '../types/folder';
 import './ProjectDocumentsPage.css';
+import '../components/users/UserManagement.css';
 
 /**
  * Page component for project documents
@@ -32,6 +33,8 @@ const ProjectDocumentsPage: React.FC = () => {
   useEffect(() => {
     if (projectId) {
       dispatch(fetchProjectById(parseInt(projectId)));
+      // Load root folders when component mounts
+      dispatch(fetchProjectRootFolders(parseInt(projectId)));
     }
   }, [dispatch, projectId]);
 
@@ -119,78 +122,82 @@ const ProjectDocumentsPage: React.FC = () => {
   const locationText = currentFolder ? `${currentFolder.name}` : 'Root';
 
   return (
-    <div className="project-documents-page">
-      <h1 className="project-documents-title">{selectedProject.name} - Documents</h1>
-      
-      <Breadcrumbs
-        projectId={parseInt(projectId!)}
-        projectName={selectedProject.name}
-        currentFolder={currentFolder}
-        onNavigate={handleBreadcrumbNavigate}
-      />
-      
-      <div className="project-documents-container">
-        <div className="project-documents-sidebar">
-          <FolderTree
-            projectId={parseInt(projectId!)}
-            onFolderSelect={handleFolderSelect}
-            selectedFolderId={currentFolder?.id}
-          />
-        </div>
+    <div className="content-area">
+      <div className="project-documents-page">
+        <h1 className="project-documents-title">{selectedProject.name} - Documents</h1>
         
-        <div className="project-documents-content">
-          <div className="document-actions">
-            <div className="document-actions-left">
-              <h3>Documents in {locationText}</h3>
-            </div>
-            
-            {isProjectManager && (
-              <div className="document-actions-right">
-                <button 
-                  className="create-folder-button"
-                  onClick={toggleCreateFolderDialog}
-                >
-                  {showCreateFolder ? 'Cancel' : 'New Folder'}
-                </button>
-                <button 
-                  className="upload-toggle-button"
-                  onClick={toggleUploadForm}
-                >
-                  {showUpload ? 'Cancel Upload' : 'Upload Document'}
-                </button>
-              </div>
-            )}
+        <Breadcrumbs
+          projectId={parseInt(projectId!)}
+          projectName={selectedProject.name}
+          currentFolder={currentFolder}
+          onNavigate={handleBreadcrumbNavigate}
+        />
+        
+        <div className="project-documents-container">
+          <div className="project-documents-sidebar">
+            <FolderTree
+              projectId={parseInt(projectId!)}
+              onFolderSelect={handleFolderSelect}
+              selectedFolderId={currentFolder?.id}
+              isProjectManager={isProjectManager}
+            />
           </div>
           
-          {showCreateFolder && isProjectManager && (
-            <CreateFolderDialog
-              projectId={parseInt(projectId!)}
-              parentFolderId={currentFolder?.id}
-              onClose={toggleCreateFolderDialog}
-              onSuccess={handleFolderCreated}
-            />
-          )}
-          
-          {showUpload && isProjectManager && (
-            <DocumentUpload
-              projectId={parseInt(projectId!)}
-              folderId={currentFolder?.id}
-              onUploadComplete={handleUploadComplete}
-            />
-          )}
-          
-          {documentsLoading ? (
-            <div className="project-documents-loading">Loading documents...</div>
-          ) : documents.length === 0 ? (
-            <div className="no-documents">
-              <p>No documents found in this location.</p>
+          <div className="project-documents-content">
+            <div className="document-actions">
+              <div className="document-actions-left">
+                <h3>Documents in {locationText}</h3>
+              </div>
+              
+              {isProjectManager && (
+                <div className="document-actions-right">
+                  <button 
+                    className="create-folder-button"
+                    onClick={toggleCreateFolderDialog}
+                  >
+                    {showCreateFolder ? 'Cancel' : 'New Folder'}
+                  </button>
+                  <button 
+                    className="upload-toggle-button"
+                    onClick={toggleUploadForm}
+                  >
+                    {showUpload ? 'Cancel Upload' : 'Upload Document'}
+                  </button>
+                </div>
+              )}
             </div>
-          ) : (
-            <DocumentList
-              onDocumentSelect={handleDocumentSelect}
-              selectedDocumentId={selectedDocument?.id}
-            />
-          )}
+            
+            {showCreateFolder && isProjectManager && (
+              <CreateFolderDialog
+                projectId={parseInt(projectId!)}
+                parentFolderId={currentFolder?.id}
+                onClose={toggleCreateFolderDialog}
+                onSuccess={handleFolderCreated}
+              />
+            )}
+            
+            {showUpload && isProjectManager && (
+              <DocumentUpload
+                projectId={parseInt(projectId!)}
+                folderId={currentFolder?.id}
+                onUploadComplete={handleUploadComplete}
+              />
+            )}
+            
+            {documentsLoading ? (
+              <div className="project-documents-loading">Loading documents...</div>
+            ) : documents.length === 0 ? (
+              <div className="no-documents">
+                <p>No documents found in this location.</p>
+              </div>
+            ) : (
+              <DocumentList
+                onDocumentSelect={handleDocumentSelect}
+                selectedDocumentId={selectedDocument?.id}
+                isProjectManager={isProjectManager}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -52,4 +52,11 @@ public interface DocumentService {
      * @throws IllegalArgumentException If the data is invalid
      */
     void validateDocumentUpload(DocumentUploadDTO uploadDTO);
+    
+    /**
+     * Delete a document.
+     *
+     * @param id The document ID
+     */
+    void deleteDocument(Long id);
 } 
