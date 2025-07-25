@@ -1,4 +1,4 @@
-import axios from './axios';
+import { chatbotApi } from './axios';
 
 interface ChatMessage {
   id: number;
@@ -24,12 +24,15 @@ interface ChatResponse {
 
 // Ask a question within a project context
 export const askProjectQuestion = async (
-  projectId: number,
-  question: string
+  projectId: string,
+  question: string,
+  sessionId: string
 ): Promise<ChatResponse> => {
   try {
-    const response = await axios.post(`/api/chatbot/projects/${projectId}/ask`, {
-      question
+    const response = await chatbotApi.post(`/chat`, {
+      prompt: question,
+      session_id: sessionId,
+      project_id: projectId
     });
     return response.data;
   } catch (error) {
@@ -40,14 +43,17 @@ export const askProjectQuestion = async (
 
 // Ask a question about a specific document
 export const askDocumentQuestion = async (
-  projectId: number,
+  projectId: string,
   documentName: string,
-  question: string
+  question: string,
+  sessionId: string
 ): Promise<ChatResponse> => {
   try {
-    const response = await axios.post(`/api/chatbot/projects/${projectId}/documents/ask`, {
+    const response = await chatbotApi.post(`/chat`, {
       documentName,
-      question
+      prompt: question,
+      session_id: sessionId,
+      project_id: projectId
     });
     return response.data;
   } catch (error) {
@@ -58,11 +64,13 @@ export const askDocumentQuestion = async (
 
 // Ask a global question (across all projects)
 export const askGlobalQuestion = async (
-  question: string
+  question: string,
+  sessionId: string
 ): Promise<ChatResponse> => {
   try {
-    const response = await axios.post('/api/chatbot/ask', {
-      question
+    const response = await chatbotApi.post('/chat', {
+      prompt: question,
+      session_id: sessionId
     });
     return response.data;
   } catch (error) {
@@ -77,7 +85,7 @@ export const getProjectConversationHistory = async (
   limit: number = 20
 ): Promise<ChatMessage[]> => {
   try {
-    const response = await axios.get(`/api/chatbot/projects/${projectId}/history`, {
+    const response = await chatbotApi.get(`/api/chatbot/projects/${projectId}/history`, {
       params: { limit }
     });
     return response.data;
@@ -92,7 +100,7 @@ export const getGlobalConversationHistory = async (
   limit: number = 20
 ): Promise<ChatMessage[]> => {
   try {
-    const response = await axios.get('/api/chatbot/history', {
+    const response = await chatbotApi.get('/api/chatbot/history', {
       params: { limit }
     });
     return response.data;
