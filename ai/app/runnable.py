@@ -1,5 +1,6 @@
-from typing import Callable, List, Literal, Optional
+from typing import Callable, List, Literal, Optional, Tuple
 
+from langchain_core.documents import Document
 from langchain_core.runnables import chain
 from langgraph.graph.graph import CompiledGraph
 from langchain_core.messages import AIMessage, SystemMessage, HumanMessage, RemoveMessage
@@ -19,6 +20,10 @@ from app.store import RAG
 repl = PythonREPL()
 
 
+class VTNetMessageState(MessagesState):
+    sources: list[str]
+
+
 @tool
 def python_repl_tool(
     code: Annotated[str, "The python code to execute to generate your chart."],
@@ -36,7 +41,7 @@ def python_repl_tool(
 
 
 @chain
-async def get_similarity_documents(input: dict) -> str:
+async def get_similarity_documents(input: dict) -> Tuple[str, list[Document]]:
     """Get similarity documents"""
 
     rag = RAG()
@@ -50,11 +55,11 @@ async def get_similarity_documents(input: dict) -> str:
             <source>{doc.metadata['source']}</source>
             <content>{doc.page_content}</content>
         </context>
-    ''' for doc in docs])
+    ''' for doc in docs]), docs
     
 
 
-async def call_model(state: MessagesState, config: dict):
+async def call_model(state: VTNetMessageState, config: dict):
     model = config['configurable']['model']
     project_id = config['configurable']['project_id']
     messages = state["messages"]
@@ -88,7 +93,7 @@ async def call_model(state: MessagesState, config: dict):
                 match=models.MatchValue(value=project_id)
             )
         )
-        context = await get_similarity_documents.ainvoke({'query': content, 'k': 10, 'filter': filter})
+        context, docs = await get_similarity_documents.ainvoke({'query': content, 'k': 5, 'filter': filter})
         last_message.content = f'''
         Base on context which provided, let's anwser this question of the user
 
@@ -101,12 +106,15 @@ async def call_model(state: MessagesState, config: dict):
         </contexts>
         '''
         messages[-1] = last_message
+        sources = [doc.metadata['source'] for doc in docs]
+    else:
+        sources = []
 
     response = model.invoke(messages)
-    return {"messages": [response]}
+    return {"messages": [response], "sources": list(set(sources))}
 
 
-def call_final_model(state: MessagesState, config: dict):
+def call_final_model(state: VTNetMessageState, config: dict):
     model = config['configurable']['model']
     messages = state["messages"]
     last_ai_message = messages[-1]
@@ -127,7 +135,7 @@ def call_final_model(state: MessagesState, config: dict):
     ]}
 
 
-def router(state: MessagesState) -> Literal["tools", "final"]:
+def router(state: VTNetMessageState) -> Literal["tools", "final"]:
     messages = state["messages"]
     last_message = messages[-1]
     if isinstance(last_message, AIMessage) and last_message.tool_calls:
@@ -143,7 +151,7 @@ def router(state: MessagesState) -> Literal["tools", "final"]:
 async def get_chat_agent(tools: Optional[List[Callable]] = None) -> CompiledGraph:
     tool_node = ToolNode(tools=tools or [])
 
-    builder = StateGraph(MessagesState)
+    builder = StateGraph(VTNetMessageState)
 
     builder.add_node("agent", call_model) #type: ignore
     builder.add_node("tools", tool_node)
@@ -165,7 +173,7 @@ async def get_chat_agent(tools: Optional[List[Callable]] = None) -> CompiledGrap
 def get_simple_chat_agent(tools: Optional[List[Callable]] = None) -> CompiledGraph:
     tool_node = ToolNode(tools=tools or [])
 
-    builder = StateGraph(MessagesState)
+    builder = StateGraph(VTNetMessageState)
 
     builder.add_node("call_model", call_model) #type: ignore
     builder.add_node("tools", tool_node)

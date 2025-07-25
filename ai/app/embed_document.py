@@ -18,32 +18,38 @@ class FileHandler(FileSystemEventHandler):
         super().__init__(*args, **kwargs)
 
     def on_created(self, event: DirCreatedEvent | FileCreatedEvent) -> None:
-        if isinstance(event, DirCreatedEvent):
-            return
+        try:
+            if isinstance(event, DirCreatedEvent):
+                return
 
-        filename = self.get_filename(event)
-        if filename:
-            project_id = self.get_project_id(event)
-            metadata = {
-                "project_id": project_id,
-            }
-            logger.info(f"File {filename} created")
-            ids = self.rag.ingest_documents([filename], metadata)
-            if ids and len(ids) > 0:
-                logger.info(f"Added documents: {ids}")
-            else:
-                logger.info("No documents has been added")
+            filename = self.get_filename(event)
+            if filename:
+                project_id = self.get_project_id(event)
+                metadata = {
+                    "project_id": project_id,
+                }
+                logger.info(f"File {filename} created")
+                ids = self.rag.ingest_documents([filename], metadata)
+                if ids and len(ids) > 0:
+                    logger.info(f"Added documents: {ids}")
+                else:
+                    logger.info("No documents has been added")
 
-        return super().on_created(event)
+            return super().on_created(event)
+        except Exception as e:
+            logger.error(e)
 
     def on_deleted(self, event: DirDeletedEvent | FileDeletedEvent) -> None:
-        filename = self.get_filename(event)
-        if filename:
-            logger.info(f"File {filename} deleted")
-            result = self.rag.remove_documents_by_source(filename)
-            logger.info(f"Deleted documents status: {result.status}")
+        try:
+            filename = self.get_filename(event)
+            if filename:
+                logger.info(f"File {filename} deleted")
+                result = self.rag.remove_documents_by_source(filename)
+                logger.info(f"Deleted documents status: {result.status}")
 
-        return super().on_deleted(event)
+            return super().on_deleted(event)
+        except Exception as e:
+            logger.error(e)
 
     def get_project_id(self, event: FileSystemEvent) -> str | None:
         filename = self.get_filename(event)

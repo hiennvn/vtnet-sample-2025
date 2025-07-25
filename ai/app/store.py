@@ -1,7 +1,10 @@
+import os
+import hashlib
 from typing import Dict, Optional, cast
 from langchain_core.documents import Document
+from langchain_text_splitters.character import RecursiveCharacterTextSplitter
 from pydantic import BaseModel, Field
-from langchain_community.document_loaders import TextLoader
+from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_text_splitters.markdown import MarkdownTextSplitter
 from langchain_ollama import OllamaEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -17,6 +20,8 @@ class ExtractedQueries(BaseModel):
 
 
 class RAG:
+    SUPPORT_EXTS = ['pdf', 'md']
+
     def __init__(self):       
         client = QdrantClient(consts.QDRANT_URL)
         self.collection_name = "documents"
@@ -40,19 +45,46 @@ class RAG:
 
     def ingest_documents(self, file_paths: list[str], metadata: Optional[Dict] = None):
         for file_path in file_paths:
-            loader = TextLoader(file_path)
-            docs = loader.load()
-            
-            if file_path.endswith('.md'):
+            ext = os.path.basename(file_path).split('.')[-1]
+            if ext not in self.SUPPORT_EXTS:
+                continue
+
+            chunks = []
+            if ext == "pdf":
+                loader = PyPDFLoader(file_path=file_path)
+                docs = loader.load()
+                splitter = RecursiveCharacterTextSplitter()
+                chunks = splitter.split_documents(docs)
+
+            elif ext == "md":
+                loader = TextLoader(file_path)
+                docs = loader.load()
                 splitter = MarkdownTextSplitter(chunk_size=1000, chunk_overlap=200)
                 chunks = splitter.split_documents(docs)
 
-                if metadata:
-                    for chunk in chunks:
-                        chunk.metadata.update(metadata)
+            unsave_documents = []
 
-                ids = self.vector_store.add_documents(chunks)
-                return ids
+            for chunk in chunks:
+                hashvalue = hashlib.sha256(chunk.page_content.encode('utf-8')).hexdigest()
+                result, _ = self.client.scroll(
+                    collection_name=self.collection_name,
+                    scroll_filter=models.Filter(
+                        must=models.FieldCondition(
+                            key="metadata.hash",
+                            match=models.MatchValue(value=hashvalue)
+                        )
+                    )
+                )
+                if len(result) > 0:
+                    continue
+
+                if metadata:
+                    chunk.metadata.update({**metadata, "hash": hashvalue})
+                unsave_documents.append(chunk)
+
+            ids = self.vector_store.add_documents(unsave_documents)
+
+            return ids
 
     async def query_documents(self, query: str, k: int = 5, filter: Optional[models.Filter] = None) -> list[Document]:
         return await self.vector_store.asimilarity_search(

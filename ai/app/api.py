@@ -40,8 +40,13 @@ class ChatRequest(BaseModel):
     prompt: str = Field()
 
 
+class ChatResponse(BaseModel):
+    message: AIMessage
+    sources: List[str]
+
+
 @app.post('/chat')
-async def chat(body: ChatRequest, request: Request) -> AIMessage:
+async def chat(body: ChatRequest, request: Request) -> ChatResponse:
     sessions = cast(Dict[str, List[BaseMessage]], request.state.sessions)
     agent = cast(CompiledGraph, request.state.agent)
     model = cast(ChatGoogleGenerativeAI, request.state.gemini)
@@ -56,9 +61,10 @@ async def chat(body: ChatRequest, request: Request) -> AIMessage:
 
     result = await agent.ainvoke({"messages": messages}, {"configurable": {"thread_id": session_id, "model": model, "project_id": body.project_id}})
     response = result["messages"][-1]
+    sources = result['sources']
     messages.append(response)
 
-    return response
+    return ChatResponse(message=response, sources=sources)
 
 
 @app.post('/stream')
