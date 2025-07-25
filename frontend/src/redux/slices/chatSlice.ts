@@ -14,7 +14,7 @@ interface ChatMessage {
   type: string;
   content: string;
   sentAt: string;
-  references?: ChatReference[];
+  references?: [];
 }
 
 interface ChatState {
@@ -38,8 +38,8 @@ const initialState: ChatState = {
 export const sendMessage = createAsyncThunk(
   'chat/sendMessage',
   async (
-    { message, projectId, isGlobal = false }: 
-    { message: string; projectId?: number; isGlobal?: boolean },
+    { message, projectId, isGlobal = false, sessionId }: 
+    { message: string; projectId?: number; isGlobal?: boolean; sessionId: string },
     { rejectWithValue }
   ) => {
     try {
@@ -48,17 +48,17 @@ export const sendMessage = createAsyncThunk(
       // Extract document name if the message is about a specific document
       const documentMatch = message.match(/what is document ["']?([^"']+)["']? about/i) || 
                            message.match(/content of document ["']?([^"']+)["']?/i);
-      
+      console.log('documentMatch', documentMatch)
       if (documentMatch && projectId) {
         // If asking about a specific document
         const documentName = documentMatch[1];
-        response = await chatbotApi.askDocumentQuestion(projectId, documentName, message);
+        response = await chatbotApi.askDocumentQuestion(projectId, documentName, message, sessionId);
       } else if (isGlobal) {
         // If in global mode
-        response = await chatbotApi.askGlobalQuestion(message);
+        response = await chatbotApi.askGlobalQuestion(message, sessionId);
       } else if (projectId) {
         // If in project mode
-        response = await chatbotApi.askProjectQuestion(projectId, message);
+        response = await chatbotApi.askProjectQuestion(projectId, message, sessionId);
       } else {
         return rejectWithValue('No project context or global mode specified');
       }
@@ -73,13 +73,9 @@ export const sendMessage = createAsyncThunk(
       // Create bot message
       const botMessage: Partial<ChatMessage> = {
         type: 'BOT',
-        content: response.response,
+        content: response.message?.content,
         sentAt: new Date().toISOString(),
-        references: response.sources?.map(source => ({
-          documentId: source.id,
-          documentName: source.name,
-          relevanceScore: source.relevanceScore
-        }))
+        references: response?.sources || []
       };
       
       return { userMessage, botMessage };
@@ -125,6 +121,12 @@ const chatSlice = createSlice({
     setProjectContext: (state, action: PayloadAction<number>) => {
       state.currentProjectId = action.payload;
       state.isGlobalMode = false;
+    },
+    setGlobalMode: (state, action: PayloadAction<boolean>) => {
+      state.isGlobalMode = action.payload;
+      if (action.payload) {
+        state.currentProjectId = null;
+      }
     },
     toggleGlobalMode: (state) => {
       state.isGlobalMode = !state.isGlobalMode;
@@ -180,7 +182,7 @@ const chatSlice = createSlice({
 });
 
 // Export actions
-export const { clearMessages, setProjectContext, toggleGlobalMode } = chatSlice.actions;
+export const { clearMessages, setProjectContext, setGlobalMode, toggleGlobalMode } = chatSlice.actions;
 
 // Export selectors
 export const selectChatMessages = (state: RootState) => state.chat.messages;

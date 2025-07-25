@@ -20,7 +20,7 @@ services:
       - STORAGE_LOCATION=/workspace/app/uploads
       - JWT_SECRET=vtnet_secure_jwt_secret_key_2025
     volumes:
-      - ./backend/uploads:/workspace/app/uploads
+      - uploads-data:/workspace/app/uploads
       - ./backend/src:/workspace/app/src
       - ./backend/pom.xml:/workspace/app/pom.xml
       - backend-m2-repo:/root/.m2
@@ -112,12 +112,76 @@ services:
     networks:
       - vtnet-network
 
+  ai-api:
+    build:
+      context: ./ai
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - vtnet-network
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    env_file: ./ai/.env
+    volumes:
+      - uploads-data:/workspace/app/uploads
+    restart: unless-stopped
+    deploy:
+      replicas: ${API_REPLICAS:-1}
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  ai-embed:
+    build:
+      context: ./ai
+      dockerfile: Dockerfile
+    volumes:
+      - uploads-data:/app/uploads
+    command:
+      - sh
+      - -c
+      - |
+        /app/.venv/bin/python app/embed_document.py
+    networks:
+      - vtnet-network
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+    env_file: ./ai/.env
+    restart: unless-stopped
+    deploy:
+      replicas: ${API_REPLICAS:-1}
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    networks:
+      - vtnet-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+    volumes:
+      - ollama:/root/.ollama
+
 volumes:
   mysql-data:
   elasticsearch-data:
   qdrant-data:
   backend-m2-repo:
   frontend-node-modules:
+  uploads-data:
+  ollama:
 
 networks:
   vtnet-network:

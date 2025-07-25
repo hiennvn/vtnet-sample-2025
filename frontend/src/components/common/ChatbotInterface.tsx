@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
+import { v4 as uuidv4 } from 'uuid';
 import { useAppDispatch, useAppSelector } from '../../redux/store';
 import { 
   sendMessage, 
-  fetchConversationHistory,
-  fetchGlobalConversationHistory,
-  setProjectContext,
-  toggleGlobalMode
+  setGlobalMode
 } from '../../redux/slices/chatSlice';
 import './ChatbotInterface.css';
 
@@ -23,6 +22,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
   isDirector
 }) => {
   const dispatch = useAppDispatch();
+  const location = useLocation();
   const chatState = useAppSelector((state) => state.chat);
   
   // Handle the case where chat state might be undefined
@@ -33,37 +33,26 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
   const isGlobalMode = chatState?.isGlobalMode || false;
   
   const [inputValue, setInputValue] = useState('');
+  const [sessionId, setSessionId] = useState<string>(() => uuidv4());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Set project context when projectId changes
+  // Generate new session ID when route changes
   useEffect(() => {
-    if (projectId && dispatch && setProjectContext) {
-      dispatch(setProjectContext(projectId));
-    }
-  }, [dispatch, projectId]);
+    setSessionId(uuidv4());
+  }, [location.pathname]);
 
-  // Fetch conversation history when opened
+  // Focus input when opened
   useEffect(() => {
-    if (!isOpen || !dispatch) return;
+    if (!isOpen) return;
     
-    try {
-      if (isGlobalMode) {
-        dispatch(fetchGlobalConversationHistory(20));
-      } else if (currentProjectId) {
-        dispatch(fetchConversationHistory({ projectId: currentProjectId, limit: 20 }));
+    // Focus input when opened
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
       }
-      
-      // Focus input when opened
-      setTimeout(() => {
-        if (inputRef.current) {
-          inputRef.current.focus();
-        }
-      }, 100);
-    } catch (error) {
-      console.error('Error fetching conversation history:', error);
-    }
-  }, [isOpen, dispatch, currentProjectId, isGlobalMode]);
+    }, 100);
+  }, [isOpen]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -83,9 +72,11 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
     
     try {
       if (isGlobalMode) {
-        dispatch(sendMessage({ message: inputValue, isGlobal: true }));
+        dispatch(sendMessage({ message: inputValue, isGlobal: true, sessionId }));
       } else if (currentProjectId) {
-        dispatch(sendMessage({ message: inputValue, projectId: currentProjectId }));
+        dispatch(sendMessage({ message: inputValue, projectId: currentProjectId.toString(), sessionId }));
+      } else {
+        console.warn('No project context or global mode set');
       }
       setInputValue('');
     } catch (error) {
@@ -99,7 +90,7 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
 
   const handleModeToggle = () => {
     if (isDirector && dispatch) {
-      dispatch(toggleGlobalMode());
+      dispatch(setGlobalMode(!isGlobalMode));
     }
   };
 
@@ -170,8 +161,8 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
                 <ul>
                   {message.references.map((ref, idx) => (
                     <li key={idx}>
-                      <a href={`#document-${ref.documentId}`}>
-                        {ref.documentName}
+                      <a href={`#document-${idx}`}>
+                        {ref}
                       </a>
                     </li>
                   ))}

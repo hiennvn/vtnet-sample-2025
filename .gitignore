@@ -101,6 +101,7 @@ Thumbs.db
 
 # Elasticsearch
 /elasticsearch/data
+.data
 
 # Logs
 logs
@@ -120,4 +121,6 @@ lerna-debug.log*
 *.sw?
 
 # Cursor specific
-.cursor 
+.cursor
+/backend/uploads
+.specstory

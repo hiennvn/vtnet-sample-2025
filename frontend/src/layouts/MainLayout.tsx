@@ -1,9 +1,10 @@
-import { ReactNode, useState, useRef, useCallback } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { ReactNode, useState, useRef, useCallback, useEffect } from 'react'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useClickOutside } from '../hooks/useClickOutside'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../redux/store'
+import { setProjectContext, setGlobalMode } from '../redux/slices/chatSlice'
 import ChatbotButton from '../components/common/ChatbotButton'
 import ChatbotInterface from '../components/common/ChatbotInterface'
 import './MainLayout.css'
@@ -15,11 +16,28 @@ interface MainLayoutProps {
 
 function MainLayout({ children, projectId }: MainLayoutProps) {
   const location = useLocation()
+  const params = useParams()
+  const dispatch = useDispatch()
   const { user, logoutUser } = useAuth()
   const [showDropdown, setShowDropdown] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const [isChatbotOpen, setIsChatbotOpen] = useState(false)
   const { user: stateUser } = useSelector((state: RootState) => state.auth)
+  
+  // Extract project ID from URL parameters
+  const urlProjectId = params.id || params.projectId
+  
+  // Determine if we're in a project context
+  const isProjectRoute = location.pathname.includes('/projects/') && urlProjectId
+  const currentProjectId = isProjectRoute ? parseInt(urlProjectId as string) : undefined
+  
+  // Determine if we're in a global context (routes that don't have specific project context)
+  const isGlobalRoute = !isProjectRoute && (
+    location.pathname === '/users' || 
+    location.pathname === '/projects' || 
+    location.pathname === '/documents' ||
+    location.pathname === '/'
+  )
   
   // Check if user is a director
   const isDirector = stateUser?.roles?.some((role: any) => {
@@ -30,6 +48,17 @@ function MainLayout({ children, projectId }: MainLayoutProps) {
     }
     return false
   }) || false
+  
+  // Set project context and global mode when route changes
+  useEffect(() => {
+    if (currentProjectId) {
+      // We're in a project context, set project mode
+      dispatch(setProjectContext(currentProjectId))
+    } else if (isGlobalRoute) {
+      // We're in a global route, set global mode
+      dispatch(setGlobalMode(true)) // This will set isGlobalMode to true
+    }
+  }, [currentProjectId, isGlobalRoute, dispatch])
   
   // Check if a path is active
   const isActive = (path: string) => {
@@ -155,7 +184,7 @@ function MainLayout({ children, projectId }: MainLayoutProps) {
       <ChatbotButton onClick={toggleChatbot} isOpen={isChatbotOpen} />
       <ChatbotInterface 
         onClose={() => setIsChatbotOpen(false)} 
-        projectId={projectId} 
+        projectId={currentProjectId} 
         isOpen={isChatbotOpen}
         isDirector={isDirector}
       />
