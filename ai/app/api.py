@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from typing import Dict, List, cast
+from typing import Dict, List, Optional, cast
 from fastapi import FastAPI, Request
 from langchain_core.messages import AIMessage, AIMessageChunk, BaseMessage, HumanMessage
 from langgraph.graph.graph import CompiledGraph
@@ -36,7 +36,7 @@ app.add_middleware(
 
 class ChatRequest(BaseModel):
     session_id: UUID4 = Field()
-    project_id: str
+    project_id: Optional[str] = Field(default=None)
     prompt: str = Field()
 
 

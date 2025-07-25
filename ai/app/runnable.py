@@ -87,13 +87,16 @@ async def call_model(state: VTNetMessageState, config: dict):
     last_message = messages[-1]
     if isinstance(last_message, HumanMessage):
         content = last_message.content
-        filter = models.Filter(
-            must=models.FieldCondition(
-                key="metadata.project_id",
-                match=models.MatchValue(value=project_id)
+        if project_id:
+            filter = models.Filter(
+                must=models.FieldCondition(
+                    key="metadata.project_id",
+                    match=models.MatchValue(value=project_id)
+                )
             )
-        )
-        context, docs = await get_similarity_documents.ainvoke({'query': content, 'k': 5, 'filter': filter})
+            context, docs = await get_similarity_documents.ainvoke({'query': content, 'k': 5, 'filter': filter})
+        else:
+            context, docs = await get_similarity_documents.ainvoke({'query': content, 'k': 5})
         last_message.content = f'''
         Base on context which provided, let's anwser this question of the user
 
