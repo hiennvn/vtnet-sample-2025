@@ -1,4 +1,4 @@
-from typing import cast
+from typing import List, cast
 from langchain_core.documents import Document
 from pydantic import BaseModel, Field
 from langchain_community.document_loaders import TextLoader
@@ -8,6 +8,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_qdrant import QdrantVectorStore
 from qdrant_client import QdrantClient
 from qdrant_client.http.models import Distance, VectorParams
+from qdrant_client import models
 from app import consts
 
 
@@ -32,7 +33,6 @@ class RAG:
         self.llm = ChatGoogleGenerativeAI(
             model="gemini-2.0-flash",
         )
-
 
     async def ingest_documents(self, file_paths: list[str]):
         for file_path in file_paths:
@@ -67,3 +67,20 @@ class RAG:
 
         return list(hashmap.values())
 
+    def remove_documents_by_source(self, source: str) -> List[str]:
+        deleted_ids = []
+        while True:
+            docs = self.vector_store.similarity_search(
+                query="",
+                k=100,
+                filter=models.Filter(
+                    must=models.FieldCondition(key="source", match=models.MatchValue(value=source))
+                )
+            ) #type:ignore
+            if len(docs) == 0:
+                break
+            ids = [doc.id for doc in docs if doc.id]
+            self.vector_store.delete(ids) #type:ignore
+            deleted_ids.extend(ids)
+
+        return deleted_ids

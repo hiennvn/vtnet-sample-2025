@@ -135,6 +135,32 @@ services:
         reservations:
           memory: 512M
 
+  ai-embed:
+    build:
+      context: ./ai
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend/uploads:/app/uploads
+    command:
+      - sh
+      - -c
+      - |
+        /app/.venv/bin/python app/embed_document.py
+    networks:
+      - vtnet-network
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-postgres}
+      - OLLAMA_BASE_URL=http://ollama:11434
+    env_file: ./ai/.env
+    restart: unless-stopped
+    deploy:
+      replicas: ${API_REPLICAS:-1}
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
   postgres:
     image: pgvector/pgvector:pg17
     ports:

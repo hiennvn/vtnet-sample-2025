@@ -32,4 +32,5 @@ dependencies = [
     "pypdf>=5.7.0",
     "psycopg[binary]",
     "langchain-qdrant>=0.2.0",
+    "watchdog>=6.0.0",
 ]

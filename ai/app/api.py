@@ -6,6 +6,7 @@ from langgraph.graph.graph import CompiledGraph
 from pydantic import BaseModel, UUID4, Field
 from langchain_google_genai import ChatGoogleGenerativeAI
 from starlette.responses import StreamingResponse
+from starlette.middleware.cors import CORSMiddleware
 from .runnable import get_simple_chat_agent
 
 
@@ -21,7 +22,16 @@ async def lifespan(*_):
     }
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    lifespan=lifespan,
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class ChatRequest(BaseModel):
