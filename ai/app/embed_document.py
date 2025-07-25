@@ -1,9 +1,12 @@
+from datetime import time
 import sys
 import logging
 import threading
 from watchdog.observers import Observer
 from watchdog.events import FileCreatedEvent, FileDeletedEvent, FileSystemEvent, FileSystemEventHandler, DirCreatedEvent, DirDeletedEvent
+from ollama import Client
 from app.store import RAG
+from app import consts
 
 
 logger = logging.getLogger(__name__)
@@ -72,6 +75,10 @@ class FileHandler(FileSystemEventHandler):
 
 
 def main():
+    logger.info('Pulling model nomic-embed-text...')
+    ollama_client = Client(consts.OLLAMA_BASE_URL)
+    ollama_client.pull('nomic-embed-text', stream=False) 
+
     watcher = Observer()
     rag = RAG()
     handler = FileHandler(rag)
