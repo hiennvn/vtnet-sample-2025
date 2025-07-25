@@ -140,7 +140,7 @@ services:
       context: ./ai
       dockerfile: Dockerfile
     volumes:
-      - ./backend/uploads:/app/uploads
+      - uploads-data:/app/uploads
     command:
       - sh
       - -c

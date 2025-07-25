@@ -1,4 +1,4 @@
-from typing import List, cast
+from typing import Dict, Optional, cast
 from langchain_core.documents import Document
 from pydantic import BaseModel, Field
 from langchain_community.document_loaders import TextLoader
@@ -18,12 +18,16 @@ class ExtractedQueries(BaseModel):
 
 class RAG:
     def __init__(self):       
-        client = QdrantClient(":memory:")
+        client = QdrantClient(consts.QDRANT_URL)
+        self.collection_name = "documents"
 
-        client.create_collection(
-            collection_name="documents",
-            vectors_config=VectorParams(size=768, distance=Distance.COSINE),
-        )
+        is_collection_existed = client.collection_exists(self.collection_name)
+        if not is_collection_existed:
+            client.create_collection(
+                collection_name="documents",
+                vectors_config=VectorParams(size=768, distance=Distance.COSINE),
+            )
+        self.client = client
         self.vector_store = QdrantVectorStore(
             client=client,
             embedding=OllamaEmbeddings(model="nomic-embed-text", base_url=consts.OLLAMA_BASE_URL),
@@ -34,21 +38,30 @@ class RAG:
             model="gemini-2.0-flash",
         )
 
-    async def ingest_documents(self, file_paths: list[str]):
+    def ingest_documents(self, file_paths: list[str], metadata: Optional[Dict] = None):
         for file_path in file_paths:
             loader = TextLoader(file_path)
-            docs = await loader.aload()
+            docs = loader.load()
             
-            if file_path.endswith('.yaml'):
-                await self.vector_store.aadd_documents(docs)
-
-            elif file_path.endswith('.md'):
+            if file_path.endswith('.md'):
                 splitter = MarkdownTextSplitter(chunk_size=1000, chunk_overlap=200)
                 chunks = splitter.split_documents(docs)
 
-                await self.vector_store.aadd_documents(chunks)
+                if metadata:
+                    for chunk in chunks:
+                        chunk.metadata.update(metadata)
 
-    async def query_documents(self, query: str, k: int = 5) -> list[Document]:
+                ids = self.vector_store.add_documents(chunks)
+                return ids
+
+    async def query_documents(self, query: str, k: int = 5, filter: Optional[models.Filter] = None) -> list[Document]:
+        return await self.vector_store.asimilarity_search(
+            query=query,
+            k=k,
+            filter=filter,
+        )
+
+    async def query_documents2(self, query: str, k: int = 5) -> list[Document]:
         extract_query_prompt = f"""
             You are a helpful assistant and let's determine and enrich the query to get the most relevant documents.
             The query is: {query}
@@ -67,20 +80,17 @@ class RAG:
 
         return list(hashmap.values())
 
-    def remove_documents_by_source(self, source: str) -> List[str]:
-        deleted_ids = []
-        while True:
-            docs = self.vector_store.similarity_search(
-                query="",
-                k=100,
-                filter=models.Filter(
-                    must=models.FieldCondition(key="source", match=models.MatchValue(value=source))
-                )
-            ) #type:ignore
-            if len(docs) == 0:
-                break
-            ids = [doc.id for doc in docs if doc.id]
-            self.vector_store.delete(ids) #type:ignore
-            deleted_ids.extend(ids)
+    def remove_documents_by_source(self, source: str):
+        scroll_filter=models.Filter(
+            must=models.FieldCondition(
+                key='metadata.source',
+                match=models.MatchValue(value=source)
+            )
+        )
+        result = self.client.delete(
+            collection_name=self.collection_name,
+            points_selector=scroll_filter,
+            wait=True
+        )
 
-        return deleted_ids
+        return result

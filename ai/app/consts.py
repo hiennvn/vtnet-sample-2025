@@ -18,3 +18,5 @@ GRAFANA_URL: str = os.getenv("GRAFANA_URL", "http://host.docker.internal:3000")
 GRAFANA_API_KEY = os.getenv("GRAFANA_API_KEY")
 
 OLLAMA_BASE_URL= os.getenv("OLLAMA_BASE_URL", "http://host.docker.internal:11434")
+
+QDRANT_URL = os.getenv("QDRANT_URL", "http://qdrant:6333")

@@ -2,7 +2,7 @@ import sys
 import logging
 import threading
 from watchdog.observers import Observer
-from watchdog.events import FileCreatedEvent, FileDeletedEvent, FileSystemEventHandler, DirCreatedEvent, DirDeletedEvent
+from watchdog.events import FileCreatedEvent, FileDeletedEvent, FileSystemEvent, FileSystemEventHandler, DirCreatedEvent, DirDeletedEvent
 from app.store import RAG
 
 
@@ -21,19 +21,48 @@ class FileHandler(FileSystemEventHandler):
         if isinstance(event, DirCreatedEvent):
             return
 
-        logger.info(f"File {event.src_path} created")
+        filename = self.get_filename(event)
+        if filename:
+            project_id = self.get_project_id(event)
+            metadata = {
+                "project_id": project_id,
+            }
+            logger.info(f"File {filename} created")
+            ids = self.rag.ingest_documents([filename], metadata)
+            if ids and len(ids) > 0:
+                logger.info(f"Added documents: {ids}")
+            else:
+                logger.info("No documents has been added")
+
         return super().on_created(event)
 
     def on_deleted(self, event: DirDeletedEvent | FileDeletedEvent) -> None:
-        if event.src_path:
-            if isinstance(event.src_path, bytes):
-                filename = event.src_path.decode('utf-8')
-            else:
-                filename = event.src_path
+        filename = self.get_filename(event)
+        if filename:
             logger.info(f"File {filename} deleted")
-            deleted = self.rag.remove_documents_by_source(filename)
-            logger.info(f"Deleted documents: {deleted}")
+            result = self.rag.remove_documents_by_source(filename)
+            logger.info(f"Deleted documents status: {result.status}")
+
         return super().on_deleted(event)
+
+    def get_project_id(self, event: FileSystemEvent) -> str | None:
+        filename = self.get_filename(event)
+        if filename:
+            try:
+                return filename.split('/')[4]
+            except Exception:
+                return None
+
+    def get_filename(self, event: FileSystemEvent) -> str | None:
+        if not event.src_path:
+            return None
+
+        if isinstance(event.src_path, bytes):
+            filename = event.src_path.decode('utf-8')
+        else:
+            filename = event.src_path
+
+        return filename
 
 
 def main():

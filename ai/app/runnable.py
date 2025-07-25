@@ -11,6 +11,7 @@ from langgraph.types import interrupt
 from typing import Annotated
 from langchain_core.tools import tool
 from langchain_experimental.utilities import PythonREPL
+from qdrant_client import models
 
 from app.store import RAG
 
@@ -41,7 +42,8 @@ async def get_similarity_documents(input: dict) -> str:
     rag = RAG()
     query = input['query']
     k = input.get('k', 10)
-    docs = await rag.query_documents(query, k)
+    filter = input.get('filter')
+    docs = await rag.query_documents(query, k, filter)
 
     return '\n'.join([f'''
         <context>
@@ -54,32 +56,39 @@ async def get_similarity_documents(input: dict) -> str:
 
 async def call_model(state: MessagesState, config: dict):
     model = config['configurable']['model']
+    project_id = config['configurable']['project_id']
     messages = state["messages"]
     messages += [SystemMessage(
         content="""
-            You are SRE Engineer, an AI assistant with expertise in operating and performing actions against a kubernetes cluster. Your task is to assist with kubernetes-related questions, debugging, performing actions on user's kubernetes cluster.
-            
-            ## Instructions:
-            - Examine current state of kubernetes resources relevant to user's query.
-            - Analyze the query, previous reasoning steps, and observations.
-            - Reflect on 5-7 different ways to solve the given query or task. Think carefully about each solution before picking the best one. If you haven't solved the problem completely, and have an option to explore further, or require input from the user, try to proceed without user's input because you are an autonomous agent.
-            - Decide on the next action: use a tool or provide a final answer.
+        You are a helpful and knowledgeable AI assistant.
 
-            ## Remember:
-            - Fetch current state of kubernetes resources relevant to user's query.
-            - Prefer the tool usage that does not require any interactive input.
-            - For creating new resources, try to create the resource using the tools available. DO NOT ask the user to create the resource.
-            - Use tools when you need more information. Do not respond with the instructions on how to use the tools or what commands to run, instead just use the tool.
-            - Provide a final answer only when you're confident you have sufficient information.
-            - Provide clear, concise, and accurate responses.
-            - Feel free to respond with emojis where appropriate.
+        Your primary goal is to answer user questions using only the content provided in the retrieved documents.
+
+        You must strictly follow these rules:
+        - Do not answer questions using your own knowledge or external information.
+        - Only rely on the content of the retrieved documents.
+        - If the information is not found in the documents, say: “I couldn’t find relevant information in the documents provided.”
+        - Provide clear, concise, and accurate answers.
+        - Do not speculate or hallucinate facts.
+        - If the user asks follow-up questions, always ground your responses in the newly retrieved documents.
+        - Maintain a professional, neutral, and helpful tone.
+
+        You are not a general-purpose assistant — you serve only to interpret and respond based on retrieved context.
+
+        Your outputs should be short and precise unless asked to elaborate.
         """
     )] + messages
 
     last_message = messages[-1]
     if isinstance(last_message, HumanMessage):
         content = last_message.content
-        context = await get_similarity_documents.ainvoke({'query': content, 'k': 10})
+        filter = models.Filter(
+            must=models.FieldCondition(
+                key="metadata.project_id",
+                match=models.MatchValue(value=project_id)
+            )
+        )
+        context = await get_similarity_documents.ainvoke({'query': content, 'k': 10, 'filter': filter})
         last_message.content = f'''
         Base on context which provided, let's anwser this question of the user
 

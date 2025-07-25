@@ -36,6 +36,7 @@ app.add_middleware(
 
 class ChatRequest(BaseModel):
     session_id: UUID4 = Field()
+    project_id: str
     prompt: str = Field()
 
 
@@ -53,7 +54,7 @@ async def chat(body: ChatRequest, request: Request) -> AIMessage:
     message = HumanMessage(body.prompt)
     messages.append(message)
 
-    result = await agent.ainvoke({"messages": messages}, {"configurable": {"thread_id": session_id, "model": model}})
+    result = await agent.ainvoke({"messages": messages}, {"configurable": {"thread_id": session_id, "model": model, "project_id": body.project_id}})
     response = result["messages"][-1]
     messages.append(response)
 
@@ -67,7 +68,6 @@ async def stream(body: ChatRequest, request: Request) -> StreamingResponse:
     model = cast(ChatGoogleGenerativeAI, request.state.gemini)
     session_id = str(body.session_id)
     messages = cast(List[BaseMessage], sessions.get(session_id))
-    print(messages)
     if messages is None:
         messages = []
         sessions[session_id] = messages
