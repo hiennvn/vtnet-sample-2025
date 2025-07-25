@@ -20,7 +20,7 @@ services:
       - STORAGE_LOCATION=/workspace/app/uploads
       - JWT_SECRET=vtnet_secure_jwt_secret_key_2025
     volumes:
-      - ./backend/uploads:/workspace/app/uploads
+      - uploads-data:/workspace/app/uploads
       - ./backend/src:/workspace/app/src
       - ./backend/pom.xml:/workspace/app/pom.xml
       - backend-m2-repo:/root/.m2
@@ -124,6 +124,8 @@ services:
       - DATABASE_URL=postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-postgres}
       - OLLAMA_BASE_URL=http://ollama:11434
     env_file: ./ai/.env
+    volumes:
+      - uploads-data:/workspace/app/uploads
     restart: unless-stopped
     deploy:
       replicas: ${API_REPLICAS:-1}
@@ -179,6 +181,7 @@ volumes:
   qdrant-data:
   backend-m2-repo:
   frontend-node-modules:
+  uploads-data:
 
 networks:
   vtnet-network:
