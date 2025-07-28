@@ -19,7 +19,6 @@
   align-items: center;
   padding: 12px 16px;
   background-color: #0078d4;
-  color: white;
 }
 
 .chatbot-header h3 {
@@ -87,6 +86,91 @@
   font-size: 14px;
   line-height: 1.4;
   word-break: break-word;
+}
+
+/* Markdown styling */
+.message-content p {
+  margin: 0 0 10px 0;
+}
+
+.message-content p:last-child {
+  margin-bottom: 0;
+}
+
+.message-content strong, 
+.message-content b {
+  font-weight: 600;
+}
+
+.message-content em, 
+.message-content i {
+  font-style: italic;
+}
+
+.message-content ul, 
+.message-content ol {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.message-content li {
+  margin-bottom: 4px;
+}
+
+.message-content h1, 
+.message-content h2, 
+.message-content h3, 
+.message-content h4 {
+  margin: 12px 0 8px 0;
+  font-weight: 600;
+}
+
+.message-content h1 {
+  font-size: 18px;
+}
+
+.message-content h2 {
+  font-size: 16px;
+}
+
+.message-content h3 {
+  font-size: 15px;
+}
+
+.message-content h4 {
+  font-size: 14px;
+}
+
+.message-content a {
+  color: #0078d4;
+  text-decoration: none;
+}
+
+.message-content a:hover {
+  text-decoration: underline;
+}
+
+.message-content code {
+  background-color: #f1f1f1;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.message-content pre {
+  background-color: #f5f5f5;
+  padding: 8px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 8px 0;
+}
+
+.message-content blockquote {
+  border-left: 3px solid #ddd;
+  margin-left: 0;
+  padding-left: 10px;
+  color: #555;
 }
 
 .message-time {

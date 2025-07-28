@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useAppDispatch, useAppSelector } from '../../redux/store';
 import { 
   sendMessage, 
@@ -153,7 +155,12 @@ const ChatbotInterface: React.FC<ChatbotInterfaceProps> = ({
             key={index} 
             className={`message ${message.type === 'USER' ? 'user-message' : 'bot-message'}`}
           >
-            <div className="message-content">{message.content}</div>
+            <div className="message-content">
+              {message.type === 'BOT' && (
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+              )}
+              {message.type === 'USER' && message.content}
+            </div>
             
             {message.type === 'BOT' && message.references && message.references.length > 0 && (
               <div className="message-sources">

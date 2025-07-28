@@ -23,36 +23,74 @@ const ProjectMemberList: React.FC<ProjectMemberListProps> = ({ projectId, canMan
   const error = useSelector(selectError);
   const [editingMemberId, setEditingMemberId] = useState<number | null>(null);
   const [editRole, setEditRole] = useState<string>('');
+  const [showRoleDialog, setShowRoleDialog] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<ProjectMember | null>(null);
 
   useEffect(() => {
     dispatch(fetchProjectMembers(projectId) as any);
   }, [dispatch, projectId]);
 
-  const handleEditClick = (member: ProjectMember) => {
-    setEditingMemberId(member.userId);
+  const handleChangeRole = (member: ProjectMember) => {
+    setSelectedMember(member);
     setEditRole(member.role);
+    setShowRoleDialog(true);
   };
 
-  const handleCancelEdit = () => {
-    setEditingMemberId(null);
+  const handleCloseRoleDialog = () => {
+    setShowRoleDialog(false);
+    setSelectedMember(null);
     setEditRole('');
   };
 
-  const handleSaveEdit = (userId: number) => {
-    const memberData: ProjectMemberUpdate = { role: editRole };
-    dispatch(updateProjectMember({ projectId, userId, memberData }) as any);
-    setEditingMemberId(null);
-    setEditRole('');
+  const handleSaveRole = () => {
+    if (selectedMember) {
+      const memberData: ProjectMemberUpdate = { role: editRole };
+      dispatch(updateProjectMember({ 
+        projectId, 
+        userId: selectedMember.userId, 
+        memberData 
+      }) as any);
+      setShowRoleDialog(false);
+      setSelectedMember(null);
+      setEditRole('');
+    }
   };
 
-  const handleRemoveMember = (userId: number) => {
-    if (window.confirm('Are you sure you want to remove this member from the project?')) {
+  const handleRemoveMember = (userId: number, userName: string) => {
+    if (window.confirm(`Are you sure you want to remove ${userName} from the project?`)) {
       dispatch(removeProjectMember({ projectId, userId }) as any);
     }
   };
 
+  // Get role display name and CSS class
+  const getRoleInfo = (role: string): { displayName: string, cssClass: string } => {
+    switch (role) {
+      case 'ROLE_DIRECTOR':
+      case 'DIRECTOR':
+        return { displayName: 'Director', cssClass: 'role-director' };
+      case 'ROLE_PROJECT_MANAGER':
+      case 'PROJECT_MANAGER':
+        return { displayName: 'Project Manager', cssClass: 'role-pm' };
+      case 'ROLE_TEAM_MEMBER':
+      case 'TEAM_MEMBER':
+        return { displayName: 'Team Member', cssClass: 'role-member' };
+      default:
+        return { displayName: 'Member', cssClass: 'role-member' };
+    }
+  };
+
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+  };
+
   if (loading) {
-    return <div>Loading project members...</div>;
+    return <div className="loading-state">
+      <div className="spinner"></div>
+      <div>Loading project members...</div>
+    </div>;
   }
 
   if (error) {
@@ -60,81 +98,119 @@ const ProjectMemberList: React.FC<ProjectMemberListProps> = ({ projectId, canMan
   }
 
   return (
-    <div className="project-member-list">
-      <h3>Project Members</h3>
-      {members.length === 0 ? (
-        <p>No members found for this project.</p>
-      ) : (
-        <table>
-          <thead>
+    <>
+      <table className="members-table">
+        <thead>
+          <tr>
+            <th style={{ width: '40%' }}>Member</th>
+            <th style={{ width: '20%' }}>Role</th>
+            <th style={{ width: '20%' }}>Added On</th>
+            <th style={{ width: '20%' }}>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {members.length === 0 ? (
             <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              {canManage && <th>Actions</th>}
+              <td colSpan={4} style={{ textAlign: 'center', padding: '24px' }}>
+                No members found for this project.
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {members.map((member) => (
-              <tr key={member.userId}>
-                <td>{member.userName}</td>
-                <td>{member.userEmail}</td>
-                <td>
-                  {editingMemberId === member.userId ? (
-                    <select
-                      value={editRole}
-                      onChange={(e) => setEditRole(e.target.value)}
-                    >
-                      <option value="ROLE_PROJECT_MANAGER">Project Manager</option>
-                      <option value="ROLE_TEAM_MEMBER">Member</option>
-                    </select>
-                  ) : (
-                    getRoleDisplayName(member.role)
-                  )}
-                </td>
-                {canManage && (
+          ) : (
+            members.map((member) => {
+              const roleInfo = getRoleInfo(member.role);
+              return (
+                <tr key={member.userId}>
                   <td>
-                    {editingMemberId === member.userId ? (
-                      <div className="action-buttons">
-                        <button onClick={() => handleSaveEdit(member.userId)}>Save</button>
-                        <button onClick={handleCancelEdit}>Cancel</button>
+                    <div className="member-info">
+                      <div className="member-avatar">
+                        <div className="avatar">{member.userName.charAt(0)}</div>
                       </div>
-                    ) : (
-                      <div className="action-buttons">
-                        <button onClick={() => handleEditClick(member)}>Edit</button>
-                        <button 
-                          onClick={() => handleRemoveMember(member.userId)}
-                          className="remove-button"
-                        >
-                          Remove
-                        </button>
+                      <div>
+                        <div className="member-name">{member.userName}</div>
+                        <div className="member-email">{member.userEmail}</div>
                       </div>
-                    )}
+                    </div>
                   </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-    </div>
-  );
-};
+                  <td>
+                    <span className={`member-role ${roleInfo.cssClass}`}>
+                      {roleInfo.displayName}
+                    </span>
+                  </td>
+                  <td>{member.addedAt ? formatDate(member.addedAt) : 'Unknown'}</td>
+                  <td>
+                    <div className="member-actions">
+                      {canManage && (
+                        <>
+                          <button 
+                            className="fluent-button outline"
+                            onClick={() => handleChangeRole(member)}
+                          >
+                            Change Role
+                          </button>
+                          {/* Don't allow removing directors */}
+                          {!member.role.includes('DIRECTOR') && (
+                            <button 
+                              className="fluent-button outline"
+                              onClick={() => handleRemoveMember(member.userId, member.userName)}
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })
+          )}
+        </tbody>
+      </table>
 
-// Helper function to display role names in a more user-friendly way
-const getRoleDisplayName = (role: string): string => {
-  switch (role) {
-    case 'PROJECT_MANAGER':
-      return 'Project Manager';
-    case 'DEVELOPER':
-      return 'Developer';
-    case 'DESIGNER':
-      return 'Designer';
-    case 'VIEWER':
-      return 'Viewer';
-    default:
-      return role;
-  }
+      {/* Change Role Dialog */}
+      {showRoleDialog && selectedMember && (
+        <>
+          <div className="dialog-backdrop" onClick={handleCloseRoleDialog}></div>
+          <div className="add-member-dialog">
+            <div className="dialog-header">
+              <div className="dialog-title">Change Member Role</div>
+              <div className="dialog-close" onClick={handleCloseRoleDialog}>×</div>
+            </div>
+            <div className="dialog-body">
+              <div className="member-info" style={{ marginBottom: '24px' }}>
+                <div className="member-avatar">
+                  <div className="avatar" style={{ width: '40px', height: '40px', fontSize: '18px' }}>
+                    {selectedMember.userName.charAt(0)}
+                  </div>
+                </div>
+                <div>
+                  <div className="member-name">{selectedMember.userName}</div>
+                  <div className="member-email">{selectedMember.userEmail}</div>
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label className="form-label">Project Role</label>
+                <select 
+                  className="form-select"
+                  value={editRole}
+                  onChange={(e) => setEditRole(e.target.value)}
+                  style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #d1d1d1' }}
+                >
+                  <option value="ROLE_PROJECT_MANAGER">Project Manager</option>
+                  <option value="ROLE_TEAM_MEMBER">Team Member</option>
+                </select>
+              </div>
+            </div>
+            <div className="dialog-footer">
+              <button className="fluent-button outline" onClick={handleCloseRoleDialog}>Cancel</button>
+              <button className="fluent-button accent" onClick={handleSaveRole}>Update Role</button>
+            </div>
+          </div>
+        </>
+      )}
+    </>
+  );
 };
 
 export default ProjectMemberList; 

@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import './styles/shared/index.css';
 import { store } from './redux/store';
 import { initializeAuth } from './redux/slices/authSlice';
 

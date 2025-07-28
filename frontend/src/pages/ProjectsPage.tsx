@@ -161,6 +161,28 @@ function ProjectsPage() {
       })
   }
   
+  // Format the relative time for "updated X time ago"
+  const formatRelativeTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) {
+      return 'just now';
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+    } else if (diffInSeconds < 604800) {
+      const days = Math.floor(diffInSeconds / 86400);
+      return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+    } else {
+      return `${date.toLocaleDateString()}`;
+    }
+  };
+  
   if (!user) {
     return (
       <div className="content-area">
@@ -197,61 +219,87 @@ function ProjectsPage() {
 
   return (
     <div className="content-area">
+      <h1 className="page-title">Projects</h1>
+      
       <div className="card">
         <div className="card-header">
-          <h1 className="card-title">Projects</h1>
+          <h2 className="card-title">All Projects</h2>
           <button 
-            className="btn btn-primary btn-add-project"
+            className="fluent-button accent"
             onClick={() => navigate('/projects/create')}
           >
-            <i className="fas fa-plus" style={{ marginRight: '8px' }}></i>
-            Add Project
+            + New Project
           </button>
         </div>
         
-        <div className="filter-section">
-          <UserSearch onSearch={handleSearch} initialValue={searchQuery} />
-          <ProjectFilter 
-            onStatusFilter={handleStatusFilter} 
-            selectedStatus={filters.status} 
-          />
+        <div className="filter-bar" style={{ marginBottom: '16px' }}>
+          <button 
+            className="fluent-button outline"
+            onClick={() => handleStatusFilter('ARCHIVED')}
+          >
+            <i className="fas fa-archive" style={{ marginRight: '8px' }}></i>
+            View Archived Projects
+          </button>
         </div>
         
-        <div className="card-content">
-          <ProjectList 
-            projects={projects}
-            loading={loading}
-            pagination={pagination}
-            filters={filters}
-            onStatusFilter={handleStatusFilter}
-            onPageChange={handlePageChange}
-            currentPage={currentPage}
-          />
-          
-          {pagination.totalPages > 1 && (
-            <div className="pagination-controls">
-              <button 
-                className="btn btn-outline"
-                disabled={currentPage === 0} 
-                onClick={() => handlePageChange(currentPage - 1)}
-              >
-                Previous
-              </button>
-              
-              <span className="pagination-info">
-                Page {currentPage + 1} of {Math.max(1, pagination.totalPages)}
-              </span>
-              
-              <button 
-                className="btn btn-outline"
-                disabled={currentPage >= pagination.totalPages - 1} 
-                onClick={() => handlePageChange(currentPage + 1)}
-              >
-                Next
-              </button>
+        <div id="projects-grid" className="project-grid">
+          {loading ? (
+            <div className="loading-state">
+              <div className="spinner"></div>
+              <div>Loading projects...</div>
             </div>
+          ) : projects.length === 0 ? (
+            <div className="empty-message">No projects found</div>
+          ) : (
+            projects.map(project => (
+              <div 
+                key={project.id} 
+                className="project-card" 
+                onClick={() => navigate(`/projects/${project.id}`)}
+              >
+                <div className="project-header">
+                  <h3 className="project-title">{project.name}</h3>
+                  <span className={`project-status status-${project.status.toLowerCase()}`}>
+                    {project.status}
+                  </span>
+                </div>
+                <div className="project-body">
+                  <p className="project-desc">
+                    {project.description || `This is the ${project.name} project. Click to view details, documents, and manage team members.`}
+                  </p>
+                  <div className="project-meta">
+                    <span>{project.documentCount || 0} documents</span>
+                    <span>Updated {formatRelativeTime(project.createdAt)}</span>
+                  </div>
+                </div>
+              </div>
+            ))
           )}
         </div>
+        
+        {pagination.totalPages > 1 && (
+          <div className="pagination-controls">
+            <button 
+              className="fluent-button outline"
+              disabled={currentPage === 0} 
+              onClick={() => handlePageChange(currentPage - 1)}
+            >
+              Previous
+            </button>
+            
+            <span className="pagination-info">
+              Page {currentPage + 1} of {Math.max(1, pagination.totalPages)}
+            </span>
+            
+            <button 
+              className="fluent-button outline"
+              disabled={currentPage >= pagination.totalPages - 1} 
+              onClick={() => handlePageChange(currentPage + 1)}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

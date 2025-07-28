@@ -1,96 +1,134 @@
-.project-documents-page {
-  height: calc(100vh - 120px);
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-}
-
-.project-documents-title {
-  margin-bottom: 20px;
-}
-
-.project-documents-container {
-  display: flex;
-  flex: 1;
-  gap: 20px;
+/* Project Documents Page Styles */
+.card {
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  border-radius: 4px;
   overflow: hidden;
 }
 
-.project-documents-sidebar {
-  width: 250px;
-  overflow: auto;
-  border-right: 1px solid #eaeaea;
-  padding-right: 15px;
+.card-header {
+  padding: 16px 0px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--neutral-stroke-rest, #d1d1d1);
 }
 
-.project-documents-content {
-  flex: 1;
-  overflow: auto;
+.page-title {
+  margin: 0;
+  margin-bottom: 16px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.document-container {
   display: flex;
-  flex-direction: column;
+  min-height: 500px;
+}
+
+.document-sidebar {
+  width: 250px;
+  border-right: 1px solid var(--neutral-stroke-rest, #d1d1d1);
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.document-content {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
 }
 
 .document-actions {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
-.document-actions-left h3 {
-  margin: 0;
-}
-
-.document-actions-right {
-  display: flex;
-  gap: 10px;
-}
-
-.upload-toggle-button, .create-folder-button {
-  padding: 8px 16px;
-  background-color: #0078d4;
-  color: white;
-  border: none;
+.document-form-container {
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #f9f9f9;
   border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
+  border: 1px solid var(--neutral-stroke-rest, #d1d1d1);
 }
 
-.upload-toggle-button:hover, .create-folder-button:hover {
-  background-color: #106ebe;
-}
-
-.create-folder-button {
-  background-color: #107c10;
-}
-
-.create-folder-button:hover {
-  background-color: #0b6a0b;
-}
-
-.no-documents {
+/* Loading State */
+.loading-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 48px 0;
+  gap: 16px;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: #09f;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.empty-state {
+  padding: 48px 24px;
   text-align: center;
-  color: #666;
-  background-color: #f9f9f9;
+  color: #616161;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.empty-state i {
+  font-size: 48px;
+  color: #95a5a6;
+}
+
+/* Button Styles */
+.fluent-button {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 12px;
   border-radius: 4px;
-  flex: 1;
-}
-
-.empty-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.project-documents-loading {
-  display: flex;
+  cursor: pointer;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  color: #666;
+  transition: all 0.1s ease-in-out;
+  border: none;
+  outline: none;
+}
+
+.fluent-button.accent {
+  background-color: var(--accent-fill-rest, #0078d4);
+  color: white;
+}
+
+.fluent-button.accent:hover {
+  background-color: var(--accent-fill-hover, #106ebe);
+}
+
+.fluent-button.outline {
+  background-color: transparent;
+  border: 1px solid var(--neutral-stroke-rest, #d1d1d1);
+  color: var(--neutral-foreground-rest, #242424);
+}
+
+.fluent-button.outline:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.fluent-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 } 

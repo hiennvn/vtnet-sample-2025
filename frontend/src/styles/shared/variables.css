@@ -1,0 +1,59 @@
+/* Variables - Fluent Design System */
+:root {
+  /* Color palette */
+  --neutral-foreground-rest: #242424;
+  --neutral-foreground-hover: #242424;
+  --neutral-stroke-rest: #d1d1d1;
+  --accent-foreground-rest: #0078d4;
+  --accent-foreground-hover: #106ebe;
+  --accent-fill-rest: #0078d4;
+  --accent-fill-hover: #106ebe;
+  --accent-fill-active: #005a9e;
+  
+  /* Status colors */
+  --status-active-color: #107c10;
+  --status-active-bg: rgba(16, 124, 16, 0.1);
+  --status-active-border: rgba(16, 124, 16, 0.3);
+  
+  --status-archived-color: #797775;
+  --status-archived-bg: rgba(121, 119, 117, 0.1);
+  --status-archived-border: rgba(121, 119, 117, 0.3);
+  
+  --status-completed-color: #0078d4;
+  --status-completed-bg: rgba(0, 120, 212, 0.1);
+  --status-completed-border: rgba(0, 120, 212, 0.3);
+  
+  --status-onhold-color: #ca5010;
+  --status-onhold-bg: rgba(202, 80, 16, 0.1);
+  --status-onhold-border: rgba(202, 80, 16, 0.3);
+  
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  
+  /* Font sizes */
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 24px;
+  
+  /* Border radius */
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-circle: 50%;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.14);
+  
+  /* Animation */
+  --transition-fast: 0.1s ease-in-out;
+  --transition-normal: 0.2s ease-in-out;
+  --transition-slow: 0.3s ease-in-out;
+} 

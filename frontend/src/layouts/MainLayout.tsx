@@ -1,5 +1,5 @@
 import { ReactNode, useState, useRef, useCallback, useEffect } from 'react'
-import { Link, useLocation, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { useClickOutside } from '../hooks/useClickOutside'
 import { useSelector, useDispatch } from 'react-redux'
@@ -16,6 +16,7 @@ interface MainLayoutProps {
 
 function MainLayout({ children, projectId }: MainLayoutProps) {
   const location = useLocation()
+  const navigate = useNavigate()
   const params = useParams()
   const dispatch = useDispatch()
   const { user, logoutUser } = useAuth()
@@ -110,41 +111,93 @@ function MainLayout({ children, projectId }: MainLayoutProps) {
     return 'Unknown Role'
   }
   
+  // Get breadcrumb based on current location
+  const getBreadcrumb = () => {
+    if (location.pathname === '/projects') {
+      return (
+        <div className="breadcrumb">
+          <span className="breadcrumb-item">Home</span> / 
+          <span className="breadcrumb-item active">Projects</span>
+        </div>
+      )
+    }
+    
+    if (location.pathname === '/users') {
+      return (
+        <div className="breadcrumb">
+          <span className="breadcrumb-item">Home</span> / 
+          <span className="breadcrumb-item active">Users</span>
+        </div>
+      )
+    }
+    
+    if (location.pathname.includes('/projects/') && urlProjectId) {
+      return (
+        <div className="breadcrumb">
+          <span className="breadcrumb-item" onClick={() => navigate('/')}>Home</span> / 
+          <span className="breadcrumb-item" onClick={() => navigate('/projects')}>Projects</span> /
+          <span className="breadcrumb-item active">Project Details</span>
+        </div>
+      )
+    }
+    
+    return (
+      <div className="breadcrumb">
+        <span className="breadcrumb-item">Home</span>
+      </div>
+    )
+  }
+  
   return (
-    <div className="main-layout">
-      <header className="app-header">
-        <div className="header-content">
-          <div className="logo">
-            <Link to="/">
-              <h1>VTNet</h1>
-            </Link>
+    <div className="layout-container">
+      {/* Sidebar Navigation */}
+      <aside className="sidebar">
+        <div className="logo">
+          <i className="fas fa-project-diagram" style={{ color: '#0078d4', fontSize: '24px' }}></i>
+          <h1>VTNet</h1>
+        </div>
+        <nav className="navigation">
+          <div 
+            className={`nav-item ${isActive('/') && !isActive('/projects') && !isActive('/users') ? 'active' : ''}`}
+            onClick={() => navigate('/')}
+          >
+            <i className="fas fa-home"></i>
+            <span>Dashboard</span>
           </div>
-          <nav className="main-nav">
-            <ul>
-              <li className={isActive('/projects') ? 'active' : ''}>
-                <Link to="/projects">
-                  <i className="fas fa-project-diagram"></i>
-                  Projects
-                </Link>
-              </li>
-              <li className={isActive('/documents') ? 'active' : ''}>
-                <Link to="/documents">
-                  <i className="fas fa-file-alt"></i>
-                  Documents
-                </Link>
-              </li>
-              <li className={isActive('/users') ? 'active' : ''}>
-                <Link to="/users">
-                  <i className="fas fa-users"></i>
-                  Users
-                </Link>
-              </li>
-            </ul>
-          </nav>
-          <div className="user-menu" ref={dropdownRef}>
-            <div className="user-profile" onClick={toggleDropdown}>
-              <span className="user-name">{user?.name || 'User'}</span>
-              <div className="avatar">{getUserInitials()}</div>
+          <div 
+            className={`nav-item ${isActive('/projects') ? 'active' : ''}`}
+            onClick={() => navigate('/projects')}
+          >
+            <i className="fas fa-folder"></i>
+            <span>Projects</span>
+          </div>
+          <div 
+            className={`nav-item ${isActive('/users') ? 'active' : ''}`}
+            onClick={() => navigate('/users')}
+          >
+            <i className="fas fa-users"></i>
+            <span>Users</span>
+          </div>
+          <div className="nav-item">
+            <i className="fas fa-cog"></i>
+            <span>Settings</span>
+          </div>
+        </nav>
+      </aside>
+      
+      {/* Main Content Area */}
+      <main className="main-content">
+        {/* Top Bar */}
+        <div className="top-bar">
+          {getBreadcrumb()}
+          <div className="user-actions">
+            <div className="search-container">
+              <input type="text" className="search-input" placeholder="Search projects and documents..." />
+            </div>
+            <div className="user-profile" ref={dropdownRef} onClick={toggleDropdown}>
+              <div className="avatar-container">
+                <div className="avatar">{getUserInitials()}</div>
+              </div>
               
               {showDropdown && (
                 <div className="user-dropdown">
@@ -168,26 +221,24 @@ function MainLayout({ children, projectId }: MainLayoutProps) {
             </div>
           </div>
         </div>
-      </header>
-      
-      <main className="app-content">
+        
+        {/* Content */}
         {children}
       </main>
       
-      <footer className="app-footer">
-        <div className="footer-content">
-          <p>&copy; {new Date().getFullYear()} VTNet Project Management System</p>
-        </div>
-      </footer>
-      
       {/* Chatbot */}
-      <ChatbotButton onClick={toggleChatbot} isOpen={isChatbotOpen} />
-      <ChatbotInterface 
-        onClose={() => setIsChatbotOpen(false)} 
-        projectId={currentProjectId} 
-        isOpen={isChatbotOpen}
-        isDirector={isDirector}
-      />
+      <div className="chatbot-toggle" onClick={toggleChatbot}>
+        <i className="fas fa-comment-dots"></i>
+      </div>
+      
+      {isChatbotOpen && (
+        <ChatbotInterface
+          isOpen={isChatbotOpen}
+          onClose={() => setIsChatbotOpen(false)}
+          projectId={currentProjectId || undefined}
+          isDirector={isDirector}
+        />
+      )}
     </div>
   )
 }

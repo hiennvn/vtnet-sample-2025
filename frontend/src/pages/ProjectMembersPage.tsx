@@ -1,13 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProjectById, selectSelectedProject } from '../redux/slices/projectSlice';
-import { clearMembers } from '../redux/slices/projectMemberSlice';
+import { clearMembers, fetchProjectMembers } from '../redux/slices/projectMemberSlice';
 import ProjectMemberList from '../components/projects/ProjectMemberList';
 import AddMemberForm from '../components/projects/AddMemberForm';
 import MainLayout from '../layouts/MainLayout';
 import './ProjectMembersPage.css';
-import '../components/users/UserManagement.css';
 
 interface RoleObject {
   id: number;
@@ -26,6 +25,7 @@ const ProjectMembersPage: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const project = useSelector(selectSelectedProject);
+  const [showAddMemberDialog, setShowAddMemberDialog] = React.useState(false);
 
   // Check if user has permissions to manage members
   const user = JSON.parse(localStorage.getItem('user_data') || '{}') as User;
@@ -50,11 +50,18 @@ const ProjectMembersPage: React.FC = () => {
     navigate(`/projects/${projectId}`);
   };
 
+  const toggleAddMemberDialog = () => {
+    setShowAddMemberDialog(!showAddMemberDialog);
+  };
+
   if (!project) {
     return (
       <MainLayout>
         <div className="content-area">
-          <div className="loading">Loading project details...</div>
+          <div className="loading-state">
+            <div className="spinner"></div>
+            <div>Loading project details...</div>
+          </div>
         </div>
       </MainLayout>
     );
@@ -63,30 +70,54 @@ const ProjectMembersPage: React.FC = () => {
   return (
     <MainLayout>
       <div className="content-area">
-        <div className="project-members-page">
-          <div className="card">
-            <div className="card-header">
-              <button className="btn btn-outline" onClick={handleBackClick}>
-                <i className="fas fa-arrow-left" style={{ marginRight: '8px' }}></i>
-                Back to Project
+        {/* Project Header */}
+        <div className="project-header">
+          <div className="project-header-top">
+            <h1 className="page-title">{project.name} - Members</h1>
+            <div className="project-actions">
+              <button 
+                className="fluent-button accent"
+                onClick={toggleAddMemberDialog}
+              >
+                <i className="fas fa-user-plus" style={{ marginRight: '8px' }}></i>
+                Add Member
               </button>
-              <h1 className="card-title">Project Members: {project.name}</h1>
-            </div>
-            
-            <div className="card-content">
-              <div className="members-container">
-                <ProjectMemberList 
-                  projectId={Number(projectId)} 
-                  canManage={hasManagePermission} 
-                />
-                
-                {hasManagePermission && (
-                  <AddMemberForm projectId={Number(projectId)} />
-                )}
-              </div>
             </div>
           </div>
+          
+          <p className="project-description">
+            Manage team members and their roles for the {project.name} project.
+          </p>
         </div>
+        
+        {/* Members Table */}
+        <div className="card">
+          <ProjectMemberList 
+            projectId={Number(projectId)} 
+            canManage={hasManagePermission} 
+          />
+        </div>
+        
+        {/* Add Member Dialog */}
+        {showAddMemberDialog && (
+          <>
+            <div className="dialog-backdrop" onClick={toggleAddMemberDialog}></div>
+            <div className="add-member-dialog">
+              <div className="dialog-header">
+                <div className="dialog-title">Add Project Member</div>
+                <div className="dialog-close" onClick={toggleAddMemberDialog}>×</div>
+              </div>
+              <AddMemberForm 
+                projectId={Number(projectId)} 
+                onClose={toggleAddMemberDialog}
+                onAddSuccess={() => {
+                  toggleAddMemberDialog();
+                  dispatch(fetchProjectMembers(Number(projectId)) as any);
+                }}
+              />
+            </div>
+          </>
+        )}
       </div>
     </MainLayout>
   );
