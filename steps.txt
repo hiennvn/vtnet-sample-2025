@@ -123,3 +123,7 @@ Write the implementation checklist to 4.checklist_us_3.md file
 
 2. Analyze the UI here @/frontend and update the @/testcases to match with UI elements
 
+3. init playwright@latest
+
+4. npx playwright test
+

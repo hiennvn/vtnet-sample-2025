@@ -75,6 +75,47 @@ Docker Compose → Service Containers → Volume Persistence → Network Communi
 - Docker network for inter-service communication
 - Environment-specific configurations (dev vs. prod)
 
+### Test-Driven Development Pattern
+Implements **TDD Pattern** for ensuring code quality and functionality:
+
+```
+Write Test → Test Fails → Implement Feature → Test Passes → Refactor
+```
+
+**Implementation Approach**:
+- Write unit tests before implementing features
+- Create test cases based on requirements
+- Implement minimum code to pass tests
+- Refactor while maintaining test coverage
+- Apply TDD to both backend and frontend development
+
+**Testing Layers**:
+- Unit tests for isolated components
+- Integration tests for component interactions
+- End-to-end tests for critical user flows
+- Component tests for frontend UI
+
+### Fluent 2 Design Pattern
+Implements **Fluent 2 Design** for consistent, modern user interface:
+
+```
+Design System → Component Library → Application UI
+```
+
+**Implementation Approach**:
+- Custom components following Fluent 2 Design principles
+- Consistent styling and interaction patterns
+- No floating buttons (per requirements)
+- Clean, intuitive user interface
+- Responsive design for different screen sizes
+
+**Key UI Components**:
+- Button: Standard interaction element
+- Toast: Notification system
+- ChatbotInterface: AI interaction component
+- Modal dialogs: For forms and confirmations
+- List components: For displaying collections of items
+
 ## Key Design Decisions
 
 ### 1. Local Storage with Database Metadata
@@ -115,6 +156,28 @@ flowchart TD
 ```
 
 **Rationale**: Service isolation with clear boundaries and scalability
+
+### 5. Test-Driven Development Approach
+```mermaid
+flowchart LR
+    Requirements[Requirements] --> TestCases[Test Cases]
+    TestCases --> Implementation[Implementation]
+    Implementation --> Validation[Validation]
+    Validation --> Refactoring[Refactoring]
+    Refactoring --> TestCases
+```
+
+**Rationale**: Ensures code quality, maintainability, and adherence to requirements
+
+### 6. Fluent 2 Design Implementation
+```mermaid
+flowchart TD
+    DesignSystem[Fluent 2 Design System] --> ComponentLibrary[Custom Component Library]
+    ComponentLibrary --> ApplicationUI[Application UI]
+    ApplicationUI --> UserExperience[User Experience]
+```
+
+**Rationale**: Provides consistent, modern user interface following project requirements
 
 ## Component Relationships
 
@@ -157,6 +220,24 @@ flowchart TD
 4. Retrieved context is sent to LLM with question
 5. LLM generates response based on context
 6. Response is returned with source references
+
+### Testing Flow Patterns
+
+#### Backend Testing Flow
+1. Define test cases based on requirements
+2. Implement unit tests for services and repositories
+3. Create integration tests for API endpoints
+4. Develop feature implementation
+5. Validate against test cases
+6. Refactor as needed while maintaining test coverage
+
+#### Frontend Testing Flow
+1. Create component test specifications
+2. Implement component tests with Jest and React Testing Library
+3. Develop UI components
+4. Validate component behavior against tests
+5. Create end-to-end tests with Playwright for critical flows
+6. Validate complete user journeys
 
 ## Database Schema Design
 
@@ -251,6 +332,14 @@ Users ──┬── Projects ──┬── Folders ──── Documents �
 - Container/Presentational component separation
 - Custom hooks for shared logic
 - Global state management with Redux
+
+### Fluent 2 Design Pattern
+- Clean, modern UI following Fluent 2 Design principles
+- Consistent component styling and behavior
+- No floating buttons (per requirements)
+- Custom component library instead of Tailwind CSS
+- Responsive design for different screen sizes
+- Accessibility considerations in component design
 
 ### Responsive Design Pattern
 - Fluid layouts that adapt to different screen sizes

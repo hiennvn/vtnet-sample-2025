@@ -1,9 +1,9 @@
 # Active Context: Project Document Management System Development
 
 ## Current Work Focus
-**Phase**: Backend Implementation - Authentication Endpoints
-**Status**: Authentication endpoints implemented, moving to other backend components
-**Date**: Current session
+**Phase**: Backend Implementation - Core API Endpoints
+**Status**: Authentication endpoints implemented, API controllers created for all major entities
+**Date**: Updated on May 15, 2025
 
 ## Recent Changes
 ✅ **Completed**:
@@ -18,28 +18,34 @@
 - Created documentation for Docker setup (docker-README.md)
 - **Implemented authentication endpoints** for login, logout, and token refresh
 - **Created JWT-based authentication system** with access and refresh tokens
+- **Created API controller structure** for all major system entities:
+  - Project management (ProjectController, ProjectMemberController)
+  - Document management (DocumentController, FolderController)
+  - User management (UserController, RoleController)
+  - Chatbot functionality (ChatbotController)
+  - Global exception handling (GlobalExceptionHandler)
 
 ## Current Task
-**Backend Implementation**: Implementing core backend functionality starting with authentication endpoints
+**Backend Implementation**: Implementing core backend functionality starting with the API endpoints for all major entities
 
 ## Next Immediate Steps
-1. **Continue Backend Implementation**
-   - Implement remaining API endpoints for user management
-   - Develop project management endpoints
-   - Implement document management functionality
-   - Connect to database using the schema defined in V1__Initial_Schema.sql
+1. **Complete Backend Implementation**
+   - Implement remaining service implementations for all controllers
+   - Develop document processing and storage functionality
+   - Connect document processing to search indexing
+   - Implement vector embeddings for semantic search
 
 2. **Frontend Implementation**
-   - Initialize React TypeScript project
-   - Create component structure following the prototype design
-   - Implement authentication and authorization UI
-   - Develop project and document management screens
+   - Create React components for all major UI sections
+   - Implement state management with Redux
+   - Connect frontend to backend API
+   - Implement authentication flow and protected routes
 
-3. **Document Processing Setup**
-   - Configure document storage system
-   - Set up text extraction pipeline
-   - Implement document indexing with Elasticsearch
-   - Create vector embeddings for semantic search
+3. **Testing Setup**
+   - Set up Playwright for end-to-end testing
+   - Create test cases for critical user flows
+   - Implement unit tests for backend services
+   - Implement component tests for frontend
 
 ## Active Decisions and Considerations
 
@@ -72,13 +78,24 @@
 - **Rationale**: Supports all core functionality with proper relationships
 - **Implementation**: Created in V1__Initial_Schema.sql with Flyway migration
 
+### Frontend Component Strategy
+- **Decision**: Use Fluent 2 Design principles with custom components
+- **Rationale**: Follows project requirements for consistent, modern UI
+- **Implementation**: Created base components (Button, Toast, etc.) following Fluent 2 Design
+
+### Testing Strategy
+- **Decision**: Use Test-Driven Development (TDD) approach
+- **Rationale**: Ensures code quality and functionality from the start
+- **Implementation**: Set up Playwright for E2E testing, JUnit for backend unit tests
+
 ## Context for Next Session
 **If session resets, the next session should**:
 1. Review the technical architecture document (3.2.tech_structure.md)
 2. Check the implementation checklist (3.3.implement_checklist.md)
 3. Continue implementation following the sequence outlined in the checklist
-4. Focus on implementing remaining backend API endpoints
-5. Use Docker Compose for local development environment
+4. Focus on implementing remaining backend service implementations
+5. Begin frontend implementation with React components
+6. Use Docker Compose for local development environment
 
 ## Open Questions
 1. Which specific LLM API (OpenAI vs. Gemini) should be used for the chatbot?
@@ -93,4 +110,5 @@
 - Elasticsearch for document indexing
 - Qdrant as vector database for embeddings
 - Docker and Docker Compose for containerization
-- JWT for authentication (io.jsonwebtoken:jjwt) 
+- JWT for authentication (io.jsonwebtoken:jjwt)
+- Playwright for end-to-end testing 

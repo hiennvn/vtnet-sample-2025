@@ -313,19 +313,32 @@
 /* Dropdown Menu */
 .dropdown {
   position: relative;
+  display: inline-block;
+  z-index: 200;
 }
 
 .dropdown-menu {
   position: absolute;
-  top: 100%;
-  background-color: white;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
-  min-width: 160px;
-  z-index: 100;
+  top: calc(100% + 4px);
   right: 0;
-  left: auto;
-  margin-top: 4px;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  min-width: 180px;
+  z-index: 1000;
+  border: 1px solid var(--neutral-stroke-rest, #d1d1d1);
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Ensure dropdown doesn't get cut off on the right edge */
@@ -337,12 +350,38 @@
 }
 
 .dropdown-item {
-  padding: 8px 16px;
+  padding: 10px 16px;
   cursor: pointer;
+  white-space: nowrap;
+  font-size: 14px;
+  user-select: none;
+  transition: background-color 0.15s ease;
+  color: var(--neutral-foreground-rest, #242424);
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-radius: 0;
+}
+
+.dropdown-item:first-child {
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+}
+
+.dropdown-item:last-child {
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
 }
 
 .dropdown-item:hover {
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+.dropdown-item:focus {
+  outline: none;
+  background-color: rgba(0, 0, 0, 0.08);
 }
 
 /* Button Styles */

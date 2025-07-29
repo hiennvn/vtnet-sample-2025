@@ -15,7 +15,7 @@
 ### Frontend
 - **Framework**: React 18.x with TypeScript
 - **State Management**: Redux Toolkit
-- **UI Components**: Material-UI or Chakra UI
+- **UI Components**: Custom components following Fluent 2 Design principles
 - **HTTP Client**: Axios for API communication
 - **Form Handling**: React Hook Form
 - **Testing**: Jest, React Testing Library
@@ -47,6 +47,12 @@
 - **Health Checks**: Implemented for all containers in production
 - **Resource Management**: CPU and memory limits defined in production
 
+### Testing
+- **End-to-End Testing**: Playwright
+- **Backend Unit Testing**: JUnit 5, Mockito
+- **Frontend Testing**: Jest, React Testing Library
+- **Methodology**: Test-Driven Development (TDD)
+
 ## Development Environment
 - **Platform**: Any modern IDE with Java and TypeScript support
 - **Operating System**: Cross-platform (developed on macOS)
@@ -61,6 +67,8 @@
 4. **Scalability**: Architecture must support future scaling needs
 5. **Compatibility**: Document viewer must support common file formats (PDF, DOCX, XLSX, etc.)
 6. **Environment Consistency**: Docker ensures consistent development and production environments
+7. **UI Design**: Must follow Fluent 2 Design principles (no floating buttons, consistent components)
+8. **Testing**: Follow Test-Driven Development approach for both backend and frontend
 
 ## System Architecture
 
@@ -160,4 +168,20 @@ The system follows Clean Architecture principles with Domain-Driven Design:
 - Incremental feature implementation
 - Continuous integration with automated testing
 - Regular performance monitoring and optimization
-- Docker Compose for local development and testing 
+- Docker Compose for local development and testing
+
+## UI Design Principles
+- Follow Fluent 2 Design guidelines
+- No floating buttons
+- Consistent component styling
+- Clean, intuitive user interface
+- Responsive design for different screen sizes
+- Custom components instead of Tailwind CSS
+
+## Testing Strategy
+- Test-Driven Development (TDD) approach
+- Write unit tests before implementation
+- End-to-end testing with Playwright
+- Component testing for frontend
+- Integration testing for backend services
+- Aim for high test coverage of critical paths 

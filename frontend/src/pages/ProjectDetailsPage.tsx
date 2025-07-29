@@ -21,9 +21,8 @@ const ProjectDetailsPage: React.FC = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { documents, loading: documentsLoading } = useAppSelector((state) => state.documents);
   const [activeTab, setActiveTab] = useState('documents');
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
+  const [showDropdown, setShowDropdown] = useState(false);
+  
   useEffect(() => {
     if (id) {
       dispatch(fetchProjectById(Number(id)));
@@ -31,22 +30,28 @@ const ProjectDetailsPage: React.FC = () => {
     }
   }, [dispatch, id]);
 
-  // Close dropdown when clicking outside
+  // Add a global click handler to close dropdown when clicking outside
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false);
+    const handleGlobalClick = (e: MouseEvent) => {
+      // Close dropdown when clicking anywhere except the dropdown itself
+      if (showDropdown) {
+        setShowDropdown(false);
       }
-    }
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
 
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen);
+    // Add the event listener to window to catch all clicks
+    window.addEventListener('click', handleGlobalClick);
+    
+    return () => {
+      window.removeEventListener('click', handleGlobalClick);
+    };
+  }, [showDropdown]);
+
+  const handleToggleDropdown = (e: React.MouseEvent) => {
+    // Stop propagation to prevent the global click handler from firing
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+    setShowDropdown(!showDropdown);
   };
 
   const handleEdit = () => {
@@ -67,9 +72,10 @@ const ProjectDetailsPage: React.FC = () => {
     }
   };
   
-  const handleDeleteClick = () => {
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setIsDeleteDialogOpen(true);
-    setDropdownOpen(false);
+    setShowDropdown(false);
   };
   
   const handleDeleteCancel = () => {
@@ -150,7 +156,7 @@ const ProjectDetailsPage: React.FC = () => {
   }
 
   return (
-    <div className="content-area">
+    <div className="content-area" onClick={() => setShowDropdown(false)}>
       {/* Project Header */}
       <div className="project-header">
         <div className="project-header-top">
@@ -162,16 +168,30 @@ const ProjectDetailsPage: React.FC = () => {
             <button className="fluent-button outline" onClick={handleManageMembers}>
               Manage Members
             </button>
-            <div className="dropdown" ref={dropdownRef}>
-              <button className="fluent-button outline" onClick={toggleDropdown}>
+            <div className="dropdown">
+              <button 
+                className="fluent-button outline" 
+                onClick={handleToggleDropdown}
+                data-testid="project-actions-dropdown"
+              >
                 <i className="fas fa-ellipsis-h"></i>
               </button>
-              {dropdownOpen && (
-                <div className="dropdown-menu">
-                  <div className="dropdown-item">Archive Project</div>
-                  <div className="dropdown-item" onClick={handleDeleteClick}>Delete Project</div>
-                </div>
-              )}
+              <div 
+                className="dropdown-menu" 
+                style={{ display: showDropdown ? 'block' : 'none' }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button className="dropdown-item">
+                  Archive Project
+                </button>
+                <button 
+                  className="dropdown-item" 
+                  onClick={handleDeleteClick}
+                  data-testid="delete-project-option"
+                >
+                  Delete Project
+                </button>
+              </div>
             </div>
           </div>
         </div>
