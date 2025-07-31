@@ -121,6 +121,5 @@ lerna-debug.log*
 *.sw?
 
 # Cursor specific
-.cursor
 /backend/uploads
 .specstory

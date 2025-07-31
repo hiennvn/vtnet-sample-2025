@@ -1,0 +1,119 @@
+# Project Guidelines for PDMS (Project Document Management System)
+
+## Development Approach
+
+### Clean Architecture with Domain-Driven Design
+- Domain Layer (core entities and business logic)
+- Application Layer (use cases and application services)
+- Interface Layer (controllers and external interfaces)
+- Infrastructure Layer (external dependencies and implementations)
+- Clear separation of concerns with domain model at the center
+
+### Test-Driven Development (TDD)
+- Write unit tests before implementing features
+- Create test cases based on requirements
+- Implement minimum code to pass tests
+- Refactor while maintaining test coverage
+- Apply TDD to both backend and frontend development
+- Backend: JUnit 5, Mockito, TestContainers
+- Frontend: Jest, React Testing Library
+- End-to-end: Playwright
+
+### Fluent 2 Design System
+- Use custom components following Fluent 2 Design principles
+- No floating buttons (per project requirements)
+- Consistent component styling and behavior
+- Clean, intuitive user interface
+- Responsive design for different screen sizes
+- Avoid using Tailwind CSS
+
+## Backend Development
+
+### Spring Boot Implementation
+- Spring Boot 3.2.x with Java 17
+- RESTful API with Spring Web
+- Spring Security with JWT authentication
+- Spring Data JPA for database access
+- Flyway for database migrations
+
+### Authentication Strategy
+- JWT-based authentication with access and refresh tokens
+- Access tokens expire after 30 minutes
+- Refresh tokens expire after 7 days
+- BCrypt for password encoding
+- Role-based authorization
+
+### Document Processing
+- Local file system storage with metadata in MySQL
+- Text extraction from various document formats
+- Content indexing with Elasticsearch
+- Vector embeddings for semantic search
+
+## Frontend Development
+
+### React Implementation
+- React 18.x with TypeScript
+- Redux Toolkit for state management
+- Custom components following Fluent 2 Design
+- React Router for navigation
+- Axios for API communication
+
+### Component Structure
+- Reusable UI components with clear responsibilities
+- Container/Presentational component separation
+- Custom hooks for shared logic
+- Consistent naming conventions
+
+### State Management
+- Redux for global state
+- Local state with React hooks
+- API state management with Redux Toolkit Query
+
+## Infrastructure
+
+### Docker Configuration
+- Docker Compose for development and production
+- Separate configurations for different environments
+- Volume mounts for data persistence
+- Service containerization (backend, frontend, MySQL, Elasticsearch, Qdrant)
+
+### Database Design
+- MySQL 8.0 for relational data
+- Clear entity relationships
+- Proper indexing for performance
+- Version control for schema changes with Flyway
+
+## Coding Standards
+
+### General
+- Follow language-specific best practices
+- Consistent code formatting
+- Meaningful variable and function names
+- Comprehensive error handling
+
+### Backend
+- PascalCase for class names
+- camelCase for method and variable names
+- Proper exception handling and logging
+- Input validation with Hibernate Validator
+
+### Frontend
+- PascalCase for component names
+- camelCase for function and variable names
+- kebab-case for CSS class names
+- Strong typing with TypeScript
+
+## Documentation
+
+### Code Documentation
+- Clear comments for complex logic
+- JavaDoc for backend public APIs
+- JSDoc for frontend components and functions
+- README files for setup instructions
+
+### Architecture Documentation
+- System architecture diagrams
+- Component relationship documentation
+- API documentation with OpenAPI/Swagger
+- Database schema documentation
+ 
