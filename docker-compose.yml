@@ -35,6 +35,12 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: development
+    command:
+      - /bin/sh
+      - -c
+      - |
+        npm i
+        npm run dev -- --host 0.0.0.0
     container_name: vtnet-frontend
     restart: unless-stopped
     depends_on:
